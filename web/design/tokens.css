@@ -1,0 +1,331 @@
+/* ==========================================================================
+   UnCalificado — tokens.css
+   Dirección: "Taller editorial" (papel de plano · ladrillo · tinta de plano · luz de obra)
+   Modo claro únicamente. Ver DIRECTION.md.
+
+   Capas:
+     1. Primitivos   (--paper-*, --ink-*, --brick-*, --amber-*, --navy-*, --nopal-*, --rojo-*)
+     2. Semánticos   (--color-bg, --color-ink, --color-accent, --color-role-*, estados)
+     3. Escalas      (tipo, espacio, radios, sombras, z-index, motion)
+
+   Regla: los componentes consumen SOLO tokens semánticos (--color-*, --role-*).
+   ========================================================================== */
+
+/* --- Fuentes -------------------------------------------------------------
+   Display: Archivo (variable, eje de ancho 62–125 → usamos condensada, rótulo de obra)
+   Cuerpo:  Atkinson Hyperlegible Next (humanista, diseñada para legibilidad extrema:
+            sol directo en obra, celular barato, vista cansada).
+   Solo 2 familias. Se cargan los pesos/ejes que se usan. */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Atkinson+Hyperlegible+Next:ital,wght@0,400..800;1,400..700&display=swap");
+
+/* Fallbacks con métricas ajustadas para reducir salto de layout (CLS).
+   Solo se usan mientras cargan las fuentes reales. */
+@font-face {
+  font-family: "Archivo Fallback";
+  src: local("Liberation Sans Narrow"), local("Helvetica Neue Condensed"), local("DejaVu Sans Condensed");
+  size-adjust: 96%;
+  ascent-override: 92%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback";
+  src: local("Liberation Sans"), local("Helvetica Neue"), local("DejaVu Sans");
+  size-adjust: 102%;
+  ascent-override: 94%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light;
+
+  /* ======================================================================
+     1. PRIMITIVOS (oklch). Neutros teñidos: papel cálido, tinta azul de plano.
+     ====================================================================== */
+
+  /* Papel de plano (matiz ~85, calidez de albanene/cartoncillo) */
+  --paper-0:   oklch(98.6% 0.008 88);   /* superficie elevada: tarjetas, campos */
+  --paper-50:  oklch(96.4% 0.016 86);   /* fondo de página */
+  --paper-100: oklch(93.4% 0.022 84);   /* fondo hundido, filas alternas */
+  --paper-200: oklch(89.2% 0.028 82);   /* cuadrícula del plano, divisores suaves */
+  --paper-300: oklch(80.5% 0.034 80);   /* reglas firmes, bordes decorativos */
+
+  /* Tinta de plano (matiz ~258, azul-negro; NO es cian) */
+  --ink-950: oklch(21% 0.035 258);      /* texto principal */
+  --ink-800: oklch(31% 0.04 258);
+  --ink-600: oklch(42% 0.04 258);       /* texto secundario */
+  --ink-500: oklch(50% 0.038 258);      /* texto terciario / placeholder (≥4.5:1 sobre papel) */
+  --ink-300: oklch(72% 0.022 258);      /* bordes de controles inactivos (decorativo) */
+
+  /* Ladrillo (matiz ~45) — CLIENTE / acento de marca */
+  --brick-100: oklch(94.5% 0.03 55);
+  --brick-200: oklch(88% 0.065 50);
+  --brick-500: oklch(57% 0.15 45);
+  --brick-600: oklch(49% 0.145 42);     /* relleno de botón primario */
+  --brick-700: oklch(41% 0.125 40);     /* texto/enlace de acento sobre papel */
+  --brick-800: oklch(32% 0.09 40);      /* canto inferior del botón */
+
+  /* Luz de obra / ocre amarillo (matiz ~85) — PROVEEDOR */
+  --amber-100: oklch(95.5% 0.06 95);
+  --amber-300: oklch(87% 0.15 90);
+  --amber-400: oklch(82% 0.16 86);      /* relleno de botón (texto de tinta encima) */
+  --amber-700: oklch(44% 0.095 72);     /* texto de acento sobre papel */
+  --amber-800: oklch(34% 0.075 68);     /* canto inferior */
+
+  /* Azul de plano / cianotipo profundo (matiz ~258, más croma que la tinta) — ADMINISTRADOR */
+  --navy-100:  oklch(93.5% 0.025 258);
+  --navy-600:  oklch(40% 0.11 258);
+  --navy-700:  oklch(33% 0.095 258);
+  --navy-900:  oklch(24% 0.06 258);
+
+  /* Verde nopal (matiz ~150) — estado correcto / verificado */
+  --nopal-100: oklch(94% 0.04 150);
+  --nopal-200: oklch(86% 0.07 150);
+  --nopal-600: oklch(44% 0.1 150);
+  --nopal-800: oklch(32% 0.07 150);
+
+  /* Rojo sello (matiz ~22) — peligro / rechazo */
+  --rojo-100:  oklch(94.5% 0.03 22);
+  --rojo-200:  oklch(86% 0.08 22);
+  --rojo-600:  oklch(46% 0.185 25);
+  --rojo-800:  oklch(33% 0.13 25);
+
+  /* ======================================================================
+     2. SEMÁNTICOS
+     ====================================================================== */
+
+  /* Superficies */
+  --color-bg:        var(--paper-50);    /* fondo de página */
+  --color-surface:   var(--paper-0);     /* tarjetas, campos, hojas */
+  --color-sunken:    var(--paper-100);   /* zonas hundidas, tablas zebra */
+  --color-grid:      var(--paper-200);   /* líneas del plano (decorativo) */
+  --color-rule:      var(--paper-300);   /* reglas/divisores */
+  --color-rule-soft: var(--paper-200);
+
+  /* Texto */
+  --color-ink:       var(--ink-950);     /* principal */
+  --color-ink-soft:  var(--ink-600);     /* secundario */
+  --color-ink-muted: var(--ink-500);     /* terciario: metadatos, placeholder */
+  --color-on-ink:    var(--paper-0);     /* texto sobre fondos oscuros */
+
+  /* Controles */
+  --color-control-border: var(--ink-500);   /* borde de campos: ≥3:1 sobre papel */
+  --color-control-bg:     var(--paper-0);
+  --color-focus:          var(--ink-950);   /* anillo de foco sobre papel */
+  --color-focus-on-dark:  var(--amber-300); /* anillo de foco sobre fondos oscuros */
+
+  /* Acento de marca (por defecto = ladrillo / cliente). Se redefine por rol. */
+  --color-accent:        var(--brick-600);
+  --color-accent-hover:  var(--brick-700);
+  --color-accent-ink:    var(--brick-700);  /* acento como texto/enlace sobre papel */
+  --color-accent-tint:   var(--brick-100);
+  --color-on-accent:     var(--paper-0);
+  --color-accent-edge:   var(--brick-800);
+
+  /* Roles (ver DIRECTION.md §3). Cada rol: fill, on-fill, ink (texto), tint, edge */
+  --color-role-cliente:           var(--brick-600);
+  --color-role-cliente-ink:       var(--brick-700);
+  --color-role-cliente-tint:      var(--brick-100);
+  --color-role-cliente-on:        var(--paper-0);
+  --color-role-cliente-edge:      var(--brick-800);
+
+  --color-role-proveedor:         var(--amber-400);
+  --color-role-proveedor-ink:     var(--amber-700);
+  --color-role-proveedor-tint:    var(--amber-100);
+  --color-role-proveedor-on:      var(--ink-950);   /* texto oscuro sobre ocre */
+  --color-role-proveedor-edge:    var(--amber-800);
+
+  --color-role-admin:             var(--navy-600);
+  --color-role-admin-ink:         var(--navy-700);
+  --color-role-admin-tint:        var(--navy-100);
+  --color-role-admin-on:          var(--paper-0);
+  --color-role-admin-edge:        var(--navy-900);
+
+  /* Estados (siempre acompañados de texto + símbolo; el color nunca va solo) */
+  --color-ok:           var(--nopal-600);
+  --color-ok-ink:       var(--nopal-800);
+  --color-ok-tint:      var(--nopal-100);
+  --color-warn:         var(--amber-400);
+  --color-warn-ink:     var(--amber-800);
+  --color-warn-tint:    var(--amber-100);
+  --color-danger:       var(--rojo-600);
+  --color-danger-ink:   var(--rojo-800);
+  --color-danger-tint:  var(--rojo-100);
+  --color-pending:      var(--ink-600);          /* en trámite: neutro con borde punteado */
+  --color-pending-ink:  var(--ink-800);
+  --color-pending-tint: var(--paper-100);
+
+  /* ======================================================================
+     3a. TIPOGRAFÍA
+     ====================================================================== */
+  --font-display: "Archivo", "Archivo Fallback", sans-serif;
+  --font-body:    "Atkinson Hyperlegible Next", "Atkinson Fallback", sans-serif;
+
+  /* Display: Archivo condensada. Pesos: 800 rótulo, 700 subtítulo, 500 etiqueta. */
+  --display-stretch: 70%;
+  --display-weight: 800;
+  --display-tracking: -0.005em;
+  --display-leading: 0.92;
+
+  /* Pesos del cuerpo (solo estos 3): 400 texto · 600 énfasis/etiquetas · 800 botones/cifras */
+  --weight-regular: 400;
+  --weight-strong: 600;
+  --weight-heavy: 800;
+
+  /* Escala modular ~1.25–1.33. App UI (xs–md): rem FIJO. Titulares (lg+): fluidos con clamp().
+     Cuerpo ≥ 17px: se lee a pleno sol. */
+  --text-xs:   0.8125rem;                                    /* 13px  leyendas, metadatos */
+  --text-sm:   0.9375rem;                                    /* 15px  secundario, tablas */
+  --text-base: 1.0625rem;                                    /* 17px  cuerpo */
+  --text-md:   1.375rem;                                     /* 22px  subtítulo / lead */
+  --text-lg:   clamp(1.625rem, 1.35rem + 1.1vw, 2.125rem);   /* 26→34 */
+  --text-xl:   clamp(2.25rem, 1.7rem + 2.2vw, 3.25rem);      /* 36→52 */
+  --text-2xl:  clamp(3rem, 2rem + 4.4vw, 5.25rem);           /* 48→84 */
+  --text-display: clamp(4.25rem, 2rem + 11vw, 10.5rem);      /* 68→168 portada */
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-body: 1.55;
+  --tracking-caps: 0.09em;          /* para MAYÚSCULAS pequeñas */
+  --measure: 62ch;                  /* ancho de lectura */
+
+  /* ======================================================================
+     3b. ESPACIO — base 4pt, semántico. Ritmo variado a propósito.
+     ====================================================================== */
+  --space-3xs: 0.25rem;   /*  4 */
+  --space-2xs: 0.5rem;    /*  8 */
+  --space-xs:  0.75rem;   /* 12 */
+  --space-sm:  1rem;      /* 16 */
+  --space-md:  1.5rem;    /* 24 */
+  --space-lg:  2rem;      /* 32 */
+  --space-xl:  3rem;      /* 48 */
+  --space-2xl: 4rem;      /* 64 */
+  --space-3xl: 6rem;      /* 96 */
+  --space-gutter:  clamp(1rem, 0.4rem + 2.8vw, 2.5rem);
+  --space-section: clamp(3.5rem, 2rem + 6vw, 8rem);
+
+  /* Densidad por rol: multiplica el padding vertical de controles/filas.
+     cliente 1 (espacioso) · proveedor 0.88 (celular, una mano) · admin 0.66 (tablas) */
+  --density: 1;
+  --tap-min: 2.75rem;               /* 44px: objetivo táctil mínimo */
+
+  /* Contenedores */
+  --container: 76rem;
+  --container-narrow: 44rem;
+
+  /* ======================================================================
+     3c. RADIOS — casi rectos: tablero, etiqueta, sello. Nada de píldoras.
+     ====================================================================== */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;       /* hojas (sheet) */
+  --radius-round: 50%;    /* solo puntos/avatares circulares */
+
+  /* ======================================================================
+     3d. LÍNEAS Y SOMBRAS — la jerarquía viene de reglas y papel, no de sombras difusas.
+     ====================================================================== */
+  --line: 1.5px;
+  --line-heavy: 3px;
+  --key-depth: 2px;                 /* canto de tecla: el botón usa box-shadow: 0 var(--key-depth) 0 var(--btn-edge) */
+  --shadow-plate: 0 1px 0 0 var(--paper-300), 0 8px 20px -14px color-mix(in oklch, var(--ink-950) 45%, transparent);
+  --shadow-sheet: 0 -1px 0 0 var(--paper-300), 0 -18px 40px -18px color-mix(in oklch, var(--ink-950) 40%, transparent);
+
+  /* ======================================================================
+     3e. Z-INDEX — escala semántica
+     ====================================================================== */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-nav: 200;
+  --z-backdrop: 300;
+  --z-sheet: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* ======================================================================
+     3f. MOTION — exponencial, sin rebote. Solo transform + opacity.
+     ====================================================================== */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:        cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-instant: 100ms;   /* presionar botón */
+  --dur-fast:    160ms;   /* hover, color */
+  --dur-base:    260ms;   /* estados, menús */
+  --dur-slow:    420ms;   /* hoja, acordeón */
+  --dur-enter:   640ms;   /* carga de página */
+  --stagger: 70ms;        /* animation-delay: calc(var(--i) * var(--stagger)) — máx. ~6 elementos */
+
+  /* Motivos de plano reutilizables (colores sólidos, sin alpha) */
+  --plano-minor: 24px;
+  --plano-major: 120px;
+  --plano-bg:
+    linear-gradient(to right, var(--color-grid) 1px, transparent 1px) 0 0 / var(--plano-major) var(--plano-major),
+    linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px) 0 0 / var(--plano-major) var(--plano-major),
+    linear-gradient(to right, var(--paper-100) 1px, transparent 1px) 0 0 / var(--plano-minor) var(--plano-minor),
+    linear-gradient(to bottom, var(--paper-100) 1px, transparent 1px) 0 0 / var(--plano-minor) var(--plano-minor);
+  --hatch: repeating-linear-gradient(135deg, var(--paper-300) 0 1.5px, transparent 1.5px 9px);
+}
+
+/* ==========================================================================
+   ROL: cambia acento y densidad. Aplicar en <html data-role="..."> o en un contenedor.
+   Cliente = ladrillo (espacioso) · Proveedor = ocre/luz de obra (compacto) · Admin = azul de plano (denso)
+   ========================================================================== */
+[data-role="cliente"] {
+  --role-fill: var(--color-role-cliente);
+  --color-accent: var(--color-role-cliente);
+  --color-accent-hover: var(--brick-700);
+  --color-accent-ink: var(--color-role-cliente-ink);
+  --color-accent-tint: var(--color-role-cliente-tint);
+  --color-on-accent: var(--color-role-cliente-on);
+  --color-accent-edge: var(--color-role-cliente-edge);
+  --density: 1;
+}
+[data-role="proveedor"] {
+  --role-fill: var(--color-role-proveedor);
+  --color-accent: var(--color-role-proveedor);
+  --color-accent-hover: var(--amber-300);
+  --color-accent-ink: var(--color-role-proveedor-ink);
+  --color-accent-tint: var(--color-role-proveedor-tint);
+  --color-on-accent: var(--color-role-proveedor-on);
+  --color-accent-edge: var(--color-role-proveedor-edge);
+  --density: 0.88;
+}
+[data-role="admin"] {
+  --role-fill: var(--color-role-admin);
+  --color-accent: var(--color-role-admin);
+  --color-accent-hover: var(--navy-700);
+  --color-accent-ink: var(--color-role-admin-ink);
+  --color-accent-tint: var(--color-role-admin-tint);
+  --color-on-accent: var(--color-role-admin-on);
+  --color-accent-edge: var(--color-role-admin-edge);
+  --density: 0.66;
+}
+/* En pantallas táctiles la densidad nunca baja el objetivo de 44px */
+@media (pointer: coarse) {
+  [data-role="admin"] { --density: 0.9; }
+}
+
+/* ==========================================================================
+   MOVIMIENTO REDUCIDO — no es opcional.
+   Los tokens colapsan: sin desplazamientos; el feedback funcional (foco, estado) permanece.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 1ms;
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+    --dur-enter: 1ms;
+    --stagger: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

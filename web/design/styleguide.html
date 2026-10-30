@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="es-MX" data-role="cliente">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>UnCalificado · Sistema visual · Lámina 01</title>
+  <meta name="description" content="Guía de estilo de UnCalificado: taller editorial, papel de plano, ladrillo y luz de obra.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 16.5 12.5 24 27.5 7.5' fill='none' stroke='%23a0391c' stroke-width='5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./tokens.css">
+  <link rel="stylesheet" href="./components.css">
+  <style>
+    /* Solo para esta página de documentación. Los componentes viven en components.css */
+    .sg-section { padding-block: var(--space-section); border-bottom: var(--line) solid var(--color-rule); }
+    .sg-section > .container { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+    .sg-head { display: grid; gap: var(--space-xs); align-content: start; max-width: 22rem; }
+    .sg-head h2 { font-size: var(--text-xl); }
+    .sg-head p { color: var(--color-ink-soft); font-size: var(--text-sm); }
+    .sg-body { display: grid; gap: var(--space-xl); min-width: 0; }
+    @media (min-width: 64rem) {
+      .sg-section > .container { grid-template-columns: 17rem minmax(0, 1fr); gap: var(--space-2xl); }
+      .sg-head { position: sticky; top: 6.5rem; align-self: start; }
+    }
+    .sg-sub { display: grid; gap: var(--space-sm); align-content: start; }
+    .sg-sub > h3 { font-size: var(--text-md); font-weight: 800; font-stretch: 78%; text-transform: uppercase; }
+    .sg-note { font-size: var(--text-sm); color: var(--color-ink-soft); max-width: 60ch; }
+    .sg-code { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; background: var(--color-sunken); padding: 1px 6px; border: 1px solid var(--color-rule); border-radius: 2px; white-space: nowrap; }
+
+    /* --- Portada ------------------------------------------------------ */
+    .sg-hero { position: relative; overflow: hidden; background: var(--plano-bg), var(--color-bg); border-bottom: var(--line-heavy) solid var(--color-ink); }
+    .sg-hero-mark { position: absolute; right: -14%; top: -4%; width: min(88vw, 52rem); color: var(--brick-200); pointer-events: none; }
+    .sg-hero-inner { position: relative; display: grid; gap: var(--space-xl); padding-block: var(--space-lg) var(--space-xl); min-height: min(46rem, 92svh); align-content: space-between; }
+    .sg-hero h1 { font-size: var(--text-display); line-height: 0.82; margin-top: var(--space-lg); }
+    .sg-hero h1 span { display: block; }
+    .sg-hero h1 .sg-h1-sub { margin-top: var(--space-sm); font-size: var(--text-xl); line-height: 0.95; color: var(--brick-700); }
+    .sg-hero-lede { font-size: var(--text-md); line-height: 1.3; max-width: 30ch; margin-top: var(--space-md); color: var(--ink-800); }
+    .sg-hero-foot { display: grid; gap: var(--space-md); align-items: end; }
+    .sg-cajetin { display: grid; grid-template-columns: 1fr 1fr; background: var(--color-surface); border: var(--line) solid var(--color-ink); max-width: 30rem; font-size: var(--text-xs); }
+    .sg-cajetin > div { padding: 0.45rem 0.7rem 0.55rem; border-right: var(--line) solid var(--color-ink); border-bottom: var(--line) solid var(--color-ink); }
+    .sg-cajetin > div:nth-child(2n) { border-right: 0; }
+    .sg-cajetin > div:nth-last-child(-n+2) { border-bottom: 0; }
+    .sg-cajetin dt { font-family: var(--font-display); font-stretch: 85%; font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-600); }
+    .sg-cajetin dd { margin: 0; font-weight: 800; font-size: var(--text-sm); }
+    @media (min-width: 52rem) { .sg-hero-foot { grid-template-columns: 1fr auto; } .sg-cajetin { grid-column: 2; } }
+
+    /* --- Marca -------------------------------------------------------- */
+    .sg-brand { display: grid; gap: var(--space-xs); grid-template-columns: minmax(0, 1fr); }
+    .sg-tile { min-width: 0; display: grid; place-items: center; padding: var(--space-lg) var(--space-sm); border: var(--line) solid var(--color-ink); min-height: 9rem; position: relative; }
+    .sg-tile > small { position: absolute; left: 0.6rem; top: 0.5rem; font-family: var(--font-display); font-stretch: 85%; font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+    .sg-tile--paper { background: var(--color-surface); }
+    .sg-tile--ink { background: var(--ink-950); color: var(--paper-0); border-color: var(--ink-950); }
+    .sg-tile--ink .wordmark { color: var(--paper-0); }
+    .sg-tile--ink .wordmark-mark { color: var(--amber-300); }
+    .sg-tile--brick { background: var(--brick-600); color: var(--paper-0); border-color: var(--brick-800); }
+    .sg-tile--brick .wordmark { color: var(--paper-0); }
+    .sg-tile--brick .wordmark-mark { color: var(--paper-0); }
+    .sg-tile--amber { background: var(--amber-400); border-color: var(--ink-950); }
+    .sg-tile--amber .wordmark-mark { color: var(--ink-950); }
+    @media (min-width: 40rem) {
+      .sg-brand { grid-template-columns: repeat(6, 1fr); }
+      .sg-tile--main { grid-column: 1 / -1; min-height: 16rem; }
+      .sg-tile--b { grid-column: span 3; }
+      .sg-tile--c { grid-column: span 2; }
+      .sg-tile--d { grid-column: span 2; }
+      .sg-tile--e { grid-column: span 2; }
+    }
+    .sg-mark-big { width: 6rem; height: 6rem; color: var(--color-role-cliente); }
+
+    /* --- Paleta: muestrario proporcional ------------------------------ */
+    .sg-ratio { display: flex; height: 3.5rem; border: var(--line) solid var(--color-ink); }
+    .sg-ratio > i { display: block; }
+    .sg-ratio-legend { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-xs); color: var(--color-ink-soft); margin-top: var(--space-2xs); }
+    .sg-family { display: grid; gap: var(--space-2xs); }
+    .sg-family > h3 { font-size: var(--text-md); text-transform: uppercase; }
+    .sg-family > h3 small { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 400; text-transform: none; color: var(--color-ink-soft); margin-left: var(--space-xs); letter-spacing: 0; }
+    .sg-strip { display: flex; flex-wrap: wrap; border: var(--line) solid var(--color-ink); }
+    .sg-sw { flex: 1 1 9.5rem; min-height: 7.5rem; padding: var(--space-xs); display: flex; flex-direction: column; justify-content: flex-end; font-size: var(--text-xs); line-height: 1.25; border-right: 1px solid color-mix(in oklch, var(--ink-950) 12%, transparent); }
+    .sg-sw:last-child { border-right: 0; }
+    .sg-sw b { font-size: var(--text-sm); font-weight: 800; }
+    .sg-sw code { font-family: var(--font-body); font-weight: 400; font-variant-numeric: tabular-nums; }
+    .sg-sw.big { flex-grow: 2.4; }
+    .sg-sw.light { color: var(--ink-950); }
+    .sg-sw.dark { color: var(--paper-0); }
+    .sg-pair { display: grid; gap: var(--space-xs); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+    .sg-pair > div { padding: var(--space-sm); border: var(--line) solid var(--color-ink); display: grid; gap: 2px; }
+    .sg-pair strong { font-family: var(--font-display); font-stretch: 78%; font-size: var(--text-md); font-weight: 800; line-height: 1; text-transform: uppercase; }
+    .sg-pair span { font-size: var(--text-xs); }
+
+    /* --- Tipografía --------------------------------------------------- */
+    .sg-spec { display: grid; gap: var(--space-lg); }
+    .sg-spec-big { font-family: var(--font-display); font-stretch: 70%; font-weight: 800; font-size: var(--text-2xl); line-height: 0.88; text-transform: uppercase; }
+    .sg-scale { display: grid; gap: 0; border-top: var(--line) solid var(--color-ink); }
+    .sg-scale > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--space-sm); align-items: baseline; padding: var(--space-xs) 0; border-bottom: 1px solid var(--color-rule); }
+    .sg-scale dt { font-size: var(--text-xs); color: var(--color-ink-soft); font-weight: 600; line-height: 1.3; }
+    .sg-scale dd { margin: 0; min-width: 0; }
+    .sg-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); }
+    @media (min-width: 52rem) { .sg-two { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sg-two--wide-l { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); } }
+
+    /* --- Roles -------------------------------------------------------- */
+    .sg-roles { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
+    @media (min-width: 64rem) { .sg-roles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sg-roles .sg-role--admin { grid-column: 1 / -1; } }
+        .sg-role { background: var(--color-surface); border: var(--line) solid var(--color-ink); min-width: 0; }
+    .sg-role .nav { position: static; }
+    .sg-role .nav-inner { padding-inline: var(--space-sm); }
+    .sg-role-body { padding: var(--space-sm); display: grid; gap: var(--space-sm); }
+    .sg-role--cliente .sg-role-body { padding: var(--space-md); gap: var(--space-md); }
+    .sg-role--proveedor .sg-role-body { gap: var(--space-xs); }
+    .sg-role--admin .sg-role-body { padding: var(--space-xs); gap: var(--space-xs); }
+    .sg-role-caption { font-size: var(--text-xs); color: var(--color-ink-soft); padding: var(--space-2xs) var(--space-sm); border-top: 1px dashed var(--color-rule); background: var(--color-sunken); max-width: none; }
+    .sg-req { display: grid; gap: var(--space-2xs); padding: var(--space-xs); border-bottom: var(--line) solid var(--color-rule); }
+    .sg-req:last-child { border-bottom: 0; }
+    .sg-req-top { display: flex; justify-content: space-between; gap: var(--space-xs); align-items: center; flex-wrap: wrap; }
+    .sg-req b { font-weight: 800; line-height: 1.2; }
+    .sg-req small { color: var(--color-ink-soft); }
+    .sg-big-project h3 { font-size: var(--text-xl); text-transform: uppercase; font-weight: 800; font-stretch: 70%; line-height: 0.92; }
+
+    /* --- Botones ------------------------------------------------------ */
+    .sg-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+    .sg-states { display: grid; gap: var(--space-xs); }
+    .sg-states > div { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-sm); align-items: center; padding-block: var(--space-2xs); border-bottom: 1px solid var(--color-rule-soft); }
+    .sg-states dt { font-size: var(--text-xs); font-weight: 600; color: var(--color-ink-soft); }
+    .sg-states dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
+
+    /* --- Formularios -------------------------------------------------- */
+    .sg-form { background: var(--color-surface); border: var(--line) solid var(--color-ink); padding: var(--space-md); display: grid; gap: var(--space-md); align-content: start; box-shadow: var(--shadow-plate); }
+    .sg-form > h3 { font-size: var(--text-lg); text-transform: uppercase; font-weight: 800; font-stretch: 72%; }
+    .sg-form .field + .field { margin-top: 0; }
+
+    /* --- Oficios ------------------------------------------------------ */
+    .sg-trades { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+
+    /* --- Estados ------------------------------------------------------ */
+    .sg-status-grid { display: grid; gap: var(--space-xs) var(--space-md); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+    .sg-status-grid > div { display: grid; gap: var(--space-2xs); padding: var(--space-xs) 0; border-top: var(--line) solid var(--color-ink); }
+    .sg-status-grid .status { justify-self: start; }
+    .sg-status-grid small { color: var(--color-ink-soft); font-size: var(--text-sm); line-height: 1.35; }
+    .sg-status-grid .sg-code { justify-self: start; }
+
+    /* --- Proveedores -------------------------------------------------- */
+    .sg-filters { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: end; padding-bottom: var(--space-sm); border-bottom: var(--line) solid var(--color-ink); }
+    .sg-filters .field { min-width: 12rem; }
+    .sg-list { display: grid; gap: var(--space-md); }
+
+    /* --- Login -------------------------------------------------------- */
+    .sg-login { display: grid; border: var(--line) solid var(--color-ink); background: var(--color-surface); min-width: 0; }
+    .sg-login-art { position: relative; overflow: hidden; display: grid; align-content: space-between; gap: var(--space-xl); padding: var(--space-md); background: var(--plano-bg), var(--color-bg); border-bottom: var(--line) solid var(--color-ink); }
+    .sg-login-art h3 { font-size: var(--text-xl); text-transform: uppercase; font-weight: 800; font-stretch: 70%; line-height: 0.9; position: relative; }
+    .sg-login-art h3 em { font-style: normal; color: var(--brick-700); display: block; }
+    .sg-login-art p { color: var(--ink-800); position: relative; font-size: var(--text-base); }
+    .sg-login-art .sg-art-mark { position: absolute; right: -2.5rem; bottom: -2.5rem; width: 15rem; color: var(--brick-200); }
+    .sg-login-form { padding: var(--space-md); display: grid; gap: var(--space-md); align-content: center; }
+    .sg-login-form h3 { font-size: var(--text-lg); text-transform: uppercase; font-weight: 800; font-stretch: 72%; }
+    .sg-login-form .fine { font-size: var(--text-sm); color: var(--color-ink-soft); }
+    .sg-login-form .or { text-align: center; font-size: var(--text-sm); color: var(--color-ink-soft); }
+    @media (min-width: 52rem) {
+      .sg-login { grid-template-columns: 1.1fr 1fr; }
+      .sg-login-art { border-bottom: 0; border-right: var(--line) solid var(--color-ink); padding: var(--space-lg); min-height: 30rem; }
+      .sg-login-form { padding: var(--space-lg); }
+    }
+
+    /* --- Nav (demo) --------------------------------------------------- */
+    .sg-phone { width: min(100%, 23rem); border: var(--line-heavy) solid var(--color-ink); background: var(--color-bg); position: relative; min-height: 15rem; display: grid; align-content: space-between; }
+    .sg-phone .nav--tabs { position: static; }
+    .sg-phone-screen { padding: var(--space-sm); display: grid; gap: var(--space-xs); }
+
+    .sg-foot { padding-block: var(--space-xl) var(--space-2xl); background: var(--ink-950); color: var(--paper-0); }
+    .sg-foot a { color: var(--amber-300); }
+    .sg-foot .wordmark { color: var(--paper-0); }
+    .sg-foot .wordmark-mark { color: var(--amber-300); }
+    .sg-foot .container { display: grid; gap: var(--space-md); }
+    .sg-foot p { color: var(--paper-100); font-size: var(--text-sm); }
+
+    /* switcher de rol en la nav */
+    .sg-switch { display: flex; gap: 2px; padding: 2px; background: var(--color-sunken); border: var(--line) solid var(--color-ink); border-radius: var(--radius-xs); }
+    .sg-switch button { min-height: 2rem; padding: 0 0.65rem; border: 0; background: transparent; font-weight: 600; font-size: var(--text-xs); cursor: pointer; border-radius: 1px; color: var(--color-ink); }
+    .sg-switch button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-ink); }
+    .sg-switch button:hover:not([aria-pressed="true"]) { background: var(--paper-200); }
+    @media (pointer: coarse) { .sg-switch button { min-height: 2.75rem; } }
+    .sg-nav-label { display: none; font-size: var(--text-xs); color: var(--color-ink-soft); font-weight: 600; }
+    @media (min-width: 64rem) { .sg-nav-label { display: block; } }
+    .nav .wordmark { --wm-size: 1.5rem; }
+    @media (max-width: 40rem) {
+      .sg-top .nav-inner { flex-wrap: wrap; row-gap: var(--space-2xs); padding-block: var(--space-xs); }
+      .sg-top .sg-switch { width: 100%; }
+      .sg-top .sg-switch button { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Símbolo de la marca: escuadra de carpintero que se lee como palomita (calificado) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="uc-mark" viewBox="0 0 32 32">
+      <path d="M5 16.5 12.5 24 27.5 7.5" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter" stroke-miterlimit="4"/>
+      <path d="M17.71 21.98L20.23 24.27M20.07 19.39L21.70 20.87M22.42 16.80L24.94 19.09M24.78 14.21L26.40 15.69M27.13 11.62L29.65 13.91" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </symbol>
+  </svg>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <!-- NAV (rol activo = cinta de color arriba) -->
+  <header class="nav sg-top">
+    <div class="nav-inner">
+      <a class="wordmark nav-brand" href="#portada" aria-label="UnCalificado, inicio">
+        <svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg>
+        <span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span>
+      </a>
+      <nav aria-label="Secciones de la guía">
+        <ul class="nav-links">
+          <li><a class="nav-link" href="#marca">Marca</a></li>
+          <li><a class="nav-link" href="#paleta">Paleta</a></li>
+          <li><a class="nav-link" href="#tipo">Tipo</a></li>
+          <li><a class="nav-link" href="#roles">Roles</a></li>
+          <li><a class="nav-link" href="#estados">Estados</a></li>
+          <li><a class="nav-link" href="#privacidad">Domicilio</a></li>
+        </ul>
+      </nav>
+      <span class="sg-nav-label" id="sw-label">Ver como</span>
+      <div class="sg-switch" role="group" aria-labelledby="sw-label" id="role-switch">
+        <button type="button" aria-pressed="true" data-set-role="cliente">Cliente</button>
+        <button type="button" aria-pressed="false" data-set-role="proveedor">Proveedor</button>
+        <button type="button" aria-pressed="false" data-set-role="admin">Admin</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido">
+
+    <!-- ============ 00 PORTADA ============ -->
+    <section class="sg-hero" id="portada" aria-labelledby="h-portada">
+      <svg class="sg-hero-mark" viewBox="0 0 32 32" aria-hidden="true"><use href="#uc-mark"/></svg>
+      <div class="container sg-hero-inner">
+        <div>
+          <p class="eyebrow reveal" style="--i:0">Sistema visual · Rev. 30 oct 2026</p>
+          <h1 id="h-portada" class="reveal" style="--i:1">
+            <span>Quien sí sabe,</span>
+            <span class="sg-h1-sub">a la vuelta de tu casa.</span>
+          </h1>
+          <p class="sg-hero-lede reveal" style="--i:2">Oficios de confianza en México. Tú decides qué dato compartes; el domicilio exacto solo lo ve quien tú autorices.</p>
+        </div>
+        <div class="sg-hero-foot">
+          <div class="cluster reveal" style="--i:3">
+            <a class="btn btn-primary btn-lg" href="#login">Ver pantalla de entrada</a>
+            <a class="btn btn-ghost" href="#paleta">Ir a la paleta</a>
+          </div>
+          <dl class="sg-cajetin reveal" style="--i:4">
+            <div><dt>Proyecto</dt><dd>UnCalificado</dd></div>
+            <div><dt>Lámina</dt><dd>01 / 12</dd></div>
+            <div><dt>Dirección</dt><dd>Taller editorial</dd></div>
+            <div><dt>Modo</dt><dd>Claro · AA</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 MARCA ============ -->
+    <section class="sg-section" id="marca" aria-labelledby="h-marca">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>01 · Marca</span></div>
+          <h2 id="h-marca">Una escuadra que dice “sí”</h2>
+          <p>La palomita es una escuadra de carpintero, con sus marcas de regla. “Un” va ligero; “Calificado” va a peso completo, como rótulo de obra. Mínimo 20 px de alto de marca; margen de respeto igual a la altura de la “U”.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-brand">
+            <div class="sg-tile sg-tile--paper sg-tile--main">
+              <small>Principal · sobre papel</small>
+              <span class="wordmark wordmark--lg" role="img" aria-label="UnCalificado">
+                <svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg>
+                <span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span>
+              </span>
+            </div>
+            <div class="sg-tile sg-tile--ink sg-tile--b">
+              <small>Sobre tinta</small>
+              <span class="wordmark" style="--wm-size:2.5rem" role="img" aria-label="UnCalificado"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+            </div>
+            <div class="sg-tile sg-tile--brick sg-tile--b">
+              <small>Sobre ladrillo</small>
+              <span class="wordmark" style="--wm-size:2.5rem" role="img" aria-label="UnCalificado"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+            </div>
+            <div class="sg-tile sg-tile--amber sg-tile--c">
+              <small>Luz de obra</small>
+              <svg class="wordmark-mark sg-mark-big" aria-hidden="true" style="color:var(--ink-950)"><use href="#uc-mark"/></svg>
+            </div>
+            <div class="sg-tile sg-tile--paper sg-tile--d">
+              <small>Símbolo solo</small>
+              <svg class="wordmark-mark sg-mark-big" aria-hidden="true"><use href="#uc-mark"/></svg>
+            </div>
+            <div class="sg-tile sg-tile--paper sg-tile--e">
+              <small>Compacto (nav)</small>
+              <span class="wordmark" style="--wm-size:1.5rem" role="img" aria-label="UnCalificado"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+            </div>
+          </div>
+
+          <div class="sg-two">
+            <div class="sg-sub">
+              <h3>Cota y sello</h3>
+              <div class="cota"><span>Así se encabeza una sección</span></div>
+              <p class="sg-note">La línea de acotación es el único adorno recurrente. El sello solo se estampa donde hay una verificación real, nunca como decoración.</p>
+              <div class="cluster">
+                <span class="sello">Verificado</span>
+                <span class="sello sello--pending">En revisión</span>
+                <span class="sello sello--danger">Rechazado</span>
+              </div>
+            </div>
+            <div class="sg-sub">
+              <h3>No hacer</h3>
+              <ul class="sg-note" style="padding-left:1.1rem;display:grid;gap:.35rem">
+                <li>Poner el símbolo en un cuadro redondeado, como ícono de app genérico.</li>
+                <li>Recolorear el nombre con el color de rol. El nombre siempre es tinta.</li>
+                <li>Usar “Calificado” en minúsculas o deformarlo; el ancho condensado es parte de la marca.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 PALETA ============ -->
+    <section class="sg-section" id="paleta" aria-labelledby="h-paleta" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>02 · Paleta</span></div>
+          <h2 id="h-paleta">Papel, tinta y ladrillo</h2>
+          <p>Todo en <span class="sg-code">oklch()</span>. Los neutros están teñidos: papel cálido (matiz 85) y tinta azul de plano (matiz 258). El color de rol aparece poco (≈10 %) para que se note.</p>
+        </header>
+        <div class="sg-body">
+          <div>
+            <div class="sg-ratio" role="img" aria-label="Proporción de uso: 60 % papel, 30 % tinta, 10 % color de rol y estados">
+              <i style="flex:60;background:var(--paper-50)"></i>
+              <i style="flex:30;background:var(--ink-950)"></i>
+              <i style="flex:7;background:var(--brick-600)"></i>
+              <i style="flex:3;background:var(--amber-400)"></i>
+            </div>
+            <div class="sg-ratio-legend"><span>60 % papel</span><span>30 % tinta (texto, reglas)</span><span>10 % rol y estados</span></div>
+          </div>
+
+          <div class="sg-family">
+            <h3>Papel de plano <small>fondos y superficies · matiz 80–88</small></h3>
+            <div class="sg-strip">
+              <div class="sg-sw light" style="background:var(--paper-0)"><b>Papel 0</b><code>oklch(98.6% 0.008 88)</code>superficie, campos</div>
+              <div class="sg-sw light big" style="background:var(--paper-50)"><b>Papel 50 · --color-bg</b><code>oklch(96.4% 0.016 86)</code>fondo de página</div>
+              <div class="sg-sw light" style="background:var(--paper-100)"><b>Papel 100</b><code>oklch(93.4% 0.022 84)</code>hundido, zebra</div>
+              <div class="sg-sw light" style="background:var(--paper-200)"><b>Papel 200</b><code>oklch(89.2% 0.028 82)</code>cuadrícula</div>
+              <div class="sg-sw light" style="background:var(--paper-300)"><b>Papel 300</b><code>oklch(80.5% 0.034 80)</code>reglas</div>
+            </div>
+          </div>
+
+          <div class="sg-family">
+            <h3>Tinta de plano <small>texto y bordes · matiz 258, no es cian</small></h3>
+            <div class="sg-strip">
+              <div class="sg-sw dark big" style="background:var(--ink-950)"><b>Tinta 950 · --color-ink</b><code>oklch(21% 0.035 258)</code>texto · 17:1 sobre papel</div>
+              <div class="sg-sw dark" style="background:var(--ink-800)"><b>Tinta 800</b><code>oklch(31% 0.04 258)</code></div>
+              <div class="sg-sw dark" style="background:var(--ink-600)"><b>Tinta 600</b><code>oklch(42% 0.04 258)</code>secundario · 7.6:1</div>
+              <div class="sg-sw dark" style="background:var(--ink-500)"><b>Tinta 500</b><code>oklch(50% 0.038 258)</code>metadatos · 5.4:1</div>
+              <div class="sg-sw light" style="background:var(--ink-300)"><b>Tinta 300</b><code>oklch(72% 0.022 258)</code>solo decorativo</div>
+            </div>
+          </div>
+
+          <div class="sg-family">
+            <h3>Ladrillo <small>CLIENTE · acento de marca · matiz 40–55</small></h3>
+            <div class="sg-strip">
+              <div class="sg-sw light" style="background:var(--brick-100)"><b>Ladrillo 100</b><code>oklch(94.5% 0.03 55)</code>tinte</div>
+              <div class="sg-sw light" style="background:var(--brick-200)"><b>Ladrillo 200</b><code>oklch(88% 0.065 50)</code>ilustración</div>
+              <div class="sg-sw dark" style="background:var(--brick-500)"><b>Ladrillo 500</b><code>oklch(57% 0.15 45)</code></div>
+              <div class="sg-sw dark big" style="background:var(--brick-600)"><b>Ladrillo 600 · --color-role-cliente</b><code>oklch(49% 0.145 42)</code>botón · 6.4:1 con papel</div>
+              <div class="sg-sw dark" style="background:var(--brick-700)"><b>Ladrillo 700</b><code>oklch(41% 0.125 40)</code>texto de acento</div>
+              <div class="sg-sw dark" style="background:var(--brick-800)"><b>Ladrillo 800</b><code>oklch(32% 0.09 40)</code>canto</div>
+            </div>
+          </div>
+
+          <div class="sg-family">
+            <h3>Luz de obra <small>PROVEEDOR · ocre amarillo · matiz 68–95</small></h3>
+            <div class="sg-strip">
+              <div class="sg-sw light" style="background:var(--amber-100)"><b>Ocre 100</b><code>oklch(95.5% 0.06 95)</code>tinte</div>
+              <div class="sg-sw light" style="background:var(--amber-300)"><b>Ocre 300</b><code>oklch(87% 0.15 90)</code>foco sobre oscuro</div>
+              <div class="sg-sw light big" style="background:var(--amber-400)"><b>Ocre 400 · --color-role-proveedor</b><code>oklch(82% 0.16 86)</code>botón con tinta encima · 10:1</div>
+              <div class="sg-sw dark" style="background:var(--amber-700)"><b>Ocre 700</b><code>oklch(44% 0.095 72)</code>texto de acento</div>
+              <div class="sg-sw dark" style="background:var(--amber-800)"><b>Ocre 800</b><code>oklch(34% 0.075 68)</code>canto</div>
+            </div>
+          </div>
+
+          <div class="sg-family">
+            <h3>Azul de plano <small>ADMINISTRADOR · cianotipo profundo · matiz 258</small></h3>
+            <div class="sg-strip">
+              <div class="sg-sw light" style="background:var(--navy-100)"><b>Azul 100</b><code>oklch(93.5% 0.025 258)</code>tinte</div>
+              <div class="sg-sw dark big" style="background:var(--navy-600)"><b>Azul 600 · --color-role-admin</b><code>oklch(40% 0.11 258)</code>botón · 8.9:1</div>
+              <div class="sg-sw dark" style="background:var(--navy-700)"><b>Azul 700</b><code>oklch(33% 0.095 258)</code></div>
+              <div class="sg-sw dark" style="background:var(--navy-900)"><b>Azul 900</b><code>oklch(24% 0.06 258)</code>canto</div>
+            </div>
+          </div>
+
+          <div class="sg-two">
+            <div class="sg-family">
+              <h3>Nopal <small>ok · verificado</small></h3>
+              <div class="sg-strip">
+                <div class="sg-sw light" style="background:var(--nopal-100)"><b>100</b><code>oklch(94% 0.04 150)</code></div>
+                <div class="sg-sw light" style="background:var(--nopal-200)"><b>200</b><code>oklch(86% 0.07 150)</code></div>
+                <div class="sg-sw dark" style="background:var(--nopal-600)"><b>600</b><code>oklch(44% 0.1 150)</code></div>
+                <div class="sg-sw dark" style="background:var(--nopal-800)"><b>800</b><code>oklch(32% 0.07 150)</code></div>
+              </div>
+            </div>
+            <div class="sg-family">
+              <h3>Rojo sello <small>peligro · rechazo</small></h3>
+              <div class="sg-strip">
+                <div class="sg-sw light" style="background:var(--rojo-100)"><b>100</b><code>oklch(94.5% 0.03 22)</code></div>
+                <div class="sg-sw light" style="background:var(--rojo-200)"><b>200</b><code>oklch(86% 0.08 22)</code></div>
+                <div class="sg-sw dark" style="background:var(--rojo-600)"><b>600</b><code>oklch(46% 0.185 25)</code></div>
+                <div class="sg-sw dark" style="background:var(--rojo-800)"><b>800</b><code>oklch(33% 0.13 25)</code></div>
+              </div>
+            </div>
+          </div>
+
+          <p class="sg-note">Aviso (warn) reutiliza el ocre; en trámite (pending) usa tinta neutra con borde punteado. El color nunca va solo: todo estado lleva símbolo y texto.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 TIPOGRAFÍA ============ -->
+    <section class="sg-section" id="tipo" aria-labelledby="h-tipo">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>03 · Tipografía</span></div>
+          <h2 id="h-tipo">Rótulo y lectura</h2>
+          <p>Dos familias. <strong>Archivo</strong> en ancho condensado, como letrero pintado en barda. <strong>Atkinson Hyperlegible Next</strong> para todo lo que se lee: la diseñó el Braille Institute para que ninguna letra se confunda, útil con sol directo y celulares viejos.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-spec">
+            <p class="sg-spec-big" aria-hidden="true">Plomería sin vueltas</p>
+            <div class="sg-two sg-two--wide-l">
+              <div class="sg-sub">
+                <h3 style="font-size:var(--text-lg)">Cuerpo · Atkinson 17 px</h3>
+                <p>Cuéntanos qué se descompuso y en qué colonia estás. No necesitas decir la calle: tu domicilio exacto se queda contigo hasta que tú lo autorices para este proyecto.</p>
+                <p class="sg-note">Medida 62 ch · interlínea 1.55 · pesos 400 / 600 / 800 · cifras tabulares en tablas: <span style="font-variant-numeric:tabular-nums">$1,250.00 MXN · $980.00 MXN</span></p>
+              </div>
+              <dl class="sg-scale">
+                <div><dt>--text-display<br>68→168 px</dt><dd style="font-family:var(--font-display);font-stretch:70%;font-weight:800;font-size:2.75rem;line-height:.9;text-transform:uppercase">Obra</dd></div>
+                <div><dt>--text-2xl<br>48→84</dt><dd style="font-family:var(--font-display);font-stretch:70%;font-weight:800;font-size:2.25rem;line-height:.9;text-transform:uppercase">Tu proyecto</dd></div>
+                <div><dt>--text-xl<br>36→52</dt><dd style="font-family:var(--font-display);font-stretch:70%;font-weight:800;font-size:1.75rem;line-height:.95;text-transform:uppercase">Solicitudes nuevas</dd></div>
+                <div><dt>--text-lg<br>26→34 · h3</dt><dd style="font-family:var(--font-display);font-stretch:78%;font-weight:700;font-size:1.5rem;line-height:1">Fuga en el baño de visitas</dd></div>
+                <div><dt>--text-md<br>22 · h4 / lead</dt><dd style="font-size:1.375rem;line-height:1.25;font-weight:600">Sábado 7 de noviembre, 9:00 a. m.</dd></div>
+                <div><dt>--text-base<br>17 · cuerpo</dt><dd>Hora del centro de México. El proveedor confirma antes de ir.</dd></div>
+                <div><dt>--text-sm<br>15 · secundario</dt><dd style="font-size:.9375rem">Zona aproximada: Col. Narvarte, Benito Juárez</dd></div>
+                <div><dt>--text-xs<br>13 · leyenda</dt><dd style="font-size:.8125rem">Folio UC-2481 · actualizado hoy, 11:42 a. m.</dd></div>
+              </dl>
+            </div>
+          </div>
+          <p class="sg-note">Titulares (lg en adelante) son fluidos con <span class="sg-code">clamp()</span>; el cuerpo y los controles son rem fijos, para que la interfaz no se mueva. Mayúsculas solo en H1/H2, etiquetas y estados.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 ROLES ============ -->
+    <section class="sg-section" id="roles" aria-labelledby="h-roles" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>04 · Roles</span></div>
+          <h2 id="h-roles">Tres oficios, una familia</h2>
+          <p>Misma tipografía, mismo papel. Cambian tres cosas: la <strong>cinta de color</strong> arriba, la <strong>forma</strong> del glifo (■ cuadro, ▲ escuadra, ● sello) y la <strong>densidad</strong>.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-roles">
+
+            <!-- CLIENTE: espacioso -->
+            <article class="sg-role sg-role--cliente" data-role="cliente" aria-label="Vista de ejemplo: cliente">
+              <div class="nav nav--static">
+                <div class="nav-inner">
+                  <span class="wordmark nav-brand" style="--wm-size:1.25rem"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+                  <span class="role-tag">Cliente</span>
+                </div>
+              </div>
+              <div class="sg-role-body sg-big-project">
+                <p class="eyebrow">Tu proyecto · UC-2481</p>
+                <h3>Fuga en el baño de visitas</h3>
+                <div class="cluster">
+                  <span class="status" data-status="PROGRAMADO">Programado</span>
+                  <span class="chip"><span class="chip-key">PLO</span>Plomería</span>
+                </div>
+                <p>Ramón Cordero llega el <strong>sábado 7 de noviembre, 9:00 a. m.</strong> (hora del centro). Tú confirmas; él también.</p>
+                <div class="cluster"><button class="btn btn-primary" type="button">Confirmar cita</button><button class="btn btn-ghost" type="button">Proponer otra hora</button></div>
+              </div>
+              <p class="sg-role-caption"><strong>Cliente</strong> · ladrillo · densidad 1 · espacio generoso, una acción principal.</p>
+            </article>
+
+            <!-- PROVEEDOR: compacto, móvil -->
+            <article class="sg-role sg-role--proveedor" data-role="proveedor" aria-label="Vista de ejemplo: proveedor">
+              <div class="nav nav--static">
+                <div class="nav-inner">
+                  <span class="wordmark nav-brand" style="--wm-size:1.25rem"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+                  <span class="role-tag">Proveedor</span>
+                </div>
+              </div>
+              <div class="sg-role-body">
+                <div class="sg-req">
+                  <div class="sg-req-top"><b>Fuga en baño de visitas</b><span class="status status--pending">Sin responder</span></div>
+                  <small>Col. Narvarte · Sáb 7 nov, 9:00 a. m.</small>
+                  <div class="cluster cluster--tight"><button class="btn btn-primary btn-sm" type="button">Aceptar</button><button class="btn btn-sm" type="button">Pedir cambios</button><button class="btn btn-ghost btn-sm" type="button">Rechazar</button></div>
+                </div>
+                <div class="sg-req">
+                  <div class="sg-req-top"><b>Resanar y pintar recámara</b><span class="status status--pending">Sin responder</span></div>
+                  <small>Col. Del Valle · sin fecha</small>
+                  <div class="cluster cluster--tight"><button class="btn btn-primary btn-sm" type="button">Aceptar</button><button class="btn btn-sm" type="button">Pedir cambios</button><button class="btn btn-ghost btn-sm" type="button">Rechazar</button></div>
+                </div>
+                <div class="sg-req">
+                  <div class="sg-req-top"><b>Cambiar llaves de lavabo</b><span class="status status--ok">Aceptada</span></div>
+                  <small>Col. Portales · Lun 9 nov, 4:00 p. m.</small>
+                </div>
+              </div>
+              <p class="sg-role-caption"><strong>Proveedor</strong> · luz de obra · densidad .88 · listas para una mano, botón primario con tinta sobre ocre.</p>
+            </article>
+
+            <!-- ADMIN: denso -->
+            <article class="sg-role sg-role--admin" data-role="admin" aria-label="Vista de ejemplo: administrador">
+              <div class="nav nav--static">
+                <div class="nav-inner">
+                  <span class="wordmark nav-brand" style="--wm-size:1.25rem"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+                  <span class="role-tag">Administrador</span>
+                </div>
+              </div>
+              <div class="sg-role-body">
+                <div class="table-wrap">
+                  <table class="table">
+                    <caption class="sr-only">Documentos por verificar</caption>
+                    <thead><tr><th scope="col">Folio</th><th scope="col">Proveedor</th><th scope="col">Documento</th><th scope="col">Estado</th><th scope="col" class="num">Recibido</th><th scope="col"><span class="sr-only">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <tr><td class="folio" data-label="Folio">DOC-0412</td><th scope="row" data-label="Proveedor">Ramón Cordero Vega</th><td data-label="Documento">Identidad</td><td data-label="Estado"><span class="status status--pending">Pendiente</span></td><td class="num" data-label="Recibido">30 oct, 10:12</td><td><button class="btn btn-primary btn-sm" type="button">Revisar</button></td></tr>
+                      <tr><td class="folio" data-label="Folio">DOC-0411</td><th scope="row" data-label="Proveedor">Cuadrilla Ocampo y Hnos.</th><td data-label="Documento">Organización</td><td data-label="Estado"><span class="status status--pending">Pendiente</span></td><td class="num" data-label="Recibido">29 oct, 18:40</td><td><button class="btn btn-primary btn-sm" type="button">Revisar</button></td></tr>
+                      <tr><td class="folio" data-label="Folio">DOC-0409</td><th scope="row" data-label="Proveedor">Marisol Téllez</th><td data-label="Documento">Experiencia</td><td data-label="Estado"><span class="status status--ok">Verificada</span></td><td class="num" data-label="Recibido">29 oct, 09:05</td><td><button class="btn btn-sm" type="button">Ver</button></td></tr>
+                      <tr><td class="folio" data-label="Folio">DOC-0407</td><th scope="row" data-label="Proveedor">Vidrios y Canceles Peña</th><td data-label="Documento">Identidad</td><td data-label="Estado"><span class="status status--danger">Rechazada</span></td><td class="num" data-label="Recibido">28 oct, 13:27</td><td><button class="btn btn-sm" type="button">Ver</button></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <p class="sg-role-caption"><strong>Administrador</strong> · azul de plano · densidad .66 (.9 en pantallas táctiles) · tablas con cifras tabulares; en móvil cada fila se vuelve una ficha etiquetada.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 BOTONES ============ -->
+    <section class="sg-section" id="botones" aria-labelledby="h-botones">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>05 · Botones</span></div>
+          <h2 id="h-botones">Teclas, no pastillas</h2>
+          <p>Un canto inferior de color que se hunde 2 px al presionar. Un solo primario por vista; el resto es secundario o fantasma. Etiquetas con verbo y objeto, nunca “OK”.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-sub">
+            <h3>Primario por rol</h3>
+            <div class="sg-row">
+              <span data-role="cliente"><button class="btn btn-primary" type="button">Solicitar cotización</button></span>
+              <span data-role="proveedor"><button class="btn btn-primary" type="button">Aceptar proyecto</button></span>
+              <span data-role="admin"><button class="btn btn-primary" type="button">Verificar documento</button></span>
+            </div>
+          </div>
+          <dl class="sg-states">
+            <div><dt>Primario</dt><dd><button class="btn btn-primary" type="button">Buscar proveedores</button><button class="btn btn-primary btn-lg" type="button">Publicar proyecto</button><button class="btn btn-primary btn-sm" type="button">Guardar</button></dd></div>
+            <div><dt>Secundario</dt><dd><button class="btn" type="button">Editar proyecto</button><button class="btn btn-sm" type="button">Ver detalle</button></dd></div>
+            <div><dt>Fantasma</dt><dd><button class="btn btn-ghost" type="button">Cancelar solicitud</button><a class="btn btn-ghost" href="#botones">Ver historial</a></dd></div>
+            <div><dt>Destructivo</dt><dd><button class="btn btn-danger" type="button">Eliminar mi cuenta</button></dd></div>
+            <div><dt>Cargando</dt><dd><button class="btn btn-primary" type="button" aria-busy="true" aria-live="polite">Enviando solicitud…</button></dd></div>
+            <div><dt>Deshabilitado</dt><dd><button class="btn btn-primary" type="button" disabled>Aceptar proyecto</button><button class="btn" type="button" aria-disabled="true">Falta elegir fecha</button></dd></div>
+            <div><dt>Foco (Tab)</dt><dd><button class="btn btn-primary" type="button" id="demo-focus">Probar foco con el teclado</button><span class="sg-note">Anillo de 3 px, tinta, con 3 px de separación. Sobre fondos oscuros pasa a ocre.</span></dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 FORMULARIOS ============ -->
+    <section class="sg-section" id="formularios" aria-labelledby="h-form" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>06 · Formularios</span></div>
+          <h2 id="h-form">Campos que explican</h2>
+          <p>Etiqueta siempre visible, ayuda antes del campo, error con símbolo y texto que dice cómo arreglarlo. Se marca lo <em>opcional</em>, no lo obligatorio. Texto de 17 px: ni iOS ni el sol lo estorban.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-two">
+            <form class="sg-form" novalidate onsubmit="return false" aria-labelledby="f-reg">
+              <h3 id="f-reg">Crea tu cuenta</h3>
+              <fieldset class="choice-group choice-group--2">
+                <legend>¿Qué vienes a hacer?</legend>
+                <label class="choice choice--cliente">
+                  <input type="radio" name="rol" value="CLIENTE" checked>
+                  <span class="choice-body"><span class="choice-title">Necesito un oficio</span><span class="choice-desc">Cuento qué hace falta y elijo a quién contratar.</span></span>
+                </label>
+                <label class="choice choice--proveedor">
+                  <input type="radio" name="rol" value="PROVEEDOR">
+                  <span class="choice-body"><span class="choice-title">Ofrezco un oficio</span><span class="choice-desc">Como trabajador independiente o con mi organización.</span></span>
+                </label>
+              </fieldset>
+              <div class="field">
+                <label class="field-label" for="r-nombre">Nombre completo</label>
+                <input class="input" id="r-nombre" name="nombre" autocomplete="name" placeholder="Como aparece en tu INE">
+              </div>
+              <div class="field">
+                <label class="field-label" for="r-correo">Correo electrónico</label>
+                <p class="field-hint" id="r-correo-h">Aquí te avisamos de citas y propuestas.</p>
+                <input class="input" id="r-correo" name="correo" type="email" inputmode="email" autocomplete="email" placeholder="nombre@correo.mx" aria-describedby="r-correo-h">
+              </div>
+              <div class="field">
+                <label class="field-label" for="r-estado">Estado</label>
+                <select class="select" id="r-estado" name="estado"><option>Ciudad de México</option><option>Estado de México</option><option>Jalisco</option><option>Nuevo León</option><option>Puebla</option></select>
+              </div>
+              <label class="check"><input type="checkbox" name="aviso"><span>Leí el <a href="#privacidad">aviso de privacidad</a><small>Tu domicilio exacto nunca se publica.</small></span></label>
+              <button class="btn btn-primary btn-block" type="submit">Crear cuenta</button>
+            </form>
+
+            <div class="sg-form" role="group" aria-label="Estados de campo">
+              <h3>Estados</h3>
+              <div class="field field--invalid">
+                <label class="field-label" for="s-err">Correo electrónico</label>
+                <input class="input" id="s-err" type="email" value="ramon.cordero@correo" aria-invalid="true" aria-describedby="s-err-e">
+                <p class="field-error" id="s-err-e" role="alert">Falta el dominio del correo. Ejemplo: ramon@correo.mx</p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="s-pass">Contraseña</label>
+                <p class="field-hint" id="s-pass-h">Mínimo 10 caracteres. Una frase larga funciona mejor que un símbolo raro.</p>
+                <div class="input-group">
+                  <input class="input" id="s-pass" type="password" value="taller-de-don-ramon" autocomplete="new-password" aria-describedby="s-pass-h">
+                  <button class="btn" type="button" data-toggle-pass="s-pass" aria-controls="s-pass">Mostrar</button>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="s-desc">¿Qué necesitas? <span class="field-opt">opcional</span></label>
+                <p class="field-hint" id="s-desc-h">Medidas, materiales, desde cuándo pasa. No pongas teléfonos: los quitamos.</p>
+                <textarea class="textarea" id="s-desc" aria-describedby="s-desc-h" placeholder="Ej. Gotea el desagüe del lavabo desde el lunes."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="s-dis">Domicilio exacto</label>
+                <input class="input" id="s-dis" value="Visible después de autorizar" disabled aria-describedby="s-dis-h">
+                <p class="field-hint" id="s-dis-h">Se habilita cuando elijas a un proveedor.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 07 OFICIOS ============ -->
+    <section class="sg-section" id="oficios" aria-labelledby="h-oficios">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>07 · Oficios</span></div>
+          <h2 id="h-oficios">Diez oficios, diez claves</h2>
+          <p>Cada oficio lleva una clave de tres letras, como en la leyenda de un plano. Nada de íconos de clip-art: la clave se lee en cualquier tamaño y nunca depende del color.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-sub">
+            <h3>Etiquetas</h3>
+            <div class="sg-trades">
+              <span class="chip"><span class="chip-key">ALB</span>Albañilería</span>
+              <span class="chip"><span class="chip-key">PLO</span>Plomería</span>
+              <span class="chip"><span class="chip-key">ELE</span>Electricidad</span>
+              <span class="chip"><span class="chip-key">CAR</span>Carpintería</span>
+              <span class="chip"><span class="chip-key">HER</span>Herrería</span>
+              <span class="chip"><span class="chip-key">PIN</span>Pintura</span>
+              <span class="chip"><span class="chip-key">PIS</span>Pisos y azulejos</span>
+              <span class="chip"><span class="chip-key">VID</span>Vidriería y cancelería</span>
+              <span class="chip"><span class="chip-key">TAB</span>Tablaroca</span>
+              <span class="chip"><span class="chip-key">IMP</span>Impermeabilización</span>
+            </div>
+          </div>
+          <div class="sg-sub">
+            <h3>Filtro (toca para elegir)</h3>
+            <div class="sg-trades" role="group" aria-label="Filtrar por oficio" id="trade-filter">
+              <button class="chip" type="button" aria-pressed="true"><span class="chip-key">PLO</span>Plomería</button>
+              <button class="chip" type="button" aria-pressed="false"><span class="chip-key">ELE</span>Electricidad</button>
+              <button class="chip" type="button" aria-pressed="false"><span class="chip-key">PIN</span>Pintura</button>
+              <button class="chip" type="button" aria-pressed="false"><span class="chip-key">IMP</span>Impermeabilización</button>
+              <button class="chip" type="button" aria-pressed="false">Solo verificados</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 08 ESTADOS ============ -->
+    <section class="sg-section" id="estados" aria-labelledby="h-estados" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>08 · Estados</span></div>
+          <h2 id="h-estados">Del borrador a concluido</h2>
+          <p>El anillo se va llenando con el avance del proyecto, así se entiende sin leer. Cada estado tiene color <em>y</em> forma <em>y</em> palabra.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-status-grid">
+            <div><span class="status" data-status="BORRADOR">Borrador</span><small>Lo estás armando. Solo tú lo ves.</small><span class="sg-code">BORRADOR</span></div>
+            <div><span class="status" data-status="CONFIRMADA">Confirmada</span><small>Revisaste el resumen. Ya puede recibir propuestas.</small><span class="sg-code">CONFIRMADA</span></div>
+            <div><span class="status" data-status="PROGRAMADO">Programado</span><small>Cliente y proveedor confirmaron la cita.</small><span class="sg-code">PROGRAMADO</span></div>
+            <div><span class="status" data-status="EN_PROCESO">En proceso</span><small>El proveedor está trabajando en el sitio.</small><span class="sg-code">EN_PROCESO</span></div>
+            <div><span class="status" data-status="TERMINADO">Terminado</span><small>El proveedor avisó que acabó. Falta tu visto bueno.</small><span class="sg-code">TERMINADO</span></div>
+            <div><span class="status" data-status="CONCLUIDO">Concluido</span><small>Cerrado. Ya puedes dejar tu calificación.</small><span class="sg-code">CONCLUIDO</span></div>
+          </div>
+
+          <div class="sg-two sg-two--wide-l">
+            <div class="sg-sub">
+              <h3>Regla de avance</h3>
+              <div class="ruler-wrap"><ol class="ruler" aria-label="Avance del proyecto UC-2481">
+                <li class="is-done"><span class="sr-only">Completado: </span>Borrador<small>20 oct</small></li>
+                <li class="is-done"><span class="sr-only">Completado: </span>Confirmada<small>21 oct</small></li>
+                <li class="is-done"><span class="sr-only">Completado: </span>Programado<small>sáb 7 nov</small></li>
+                <li aria-current="step"><span class="sr-only">Paso actual: </span>En proceso<small>hoy</small></li>
+                <li>Terminado</li>
+                <li>Concluido</li>
+              </ol></div>
+            </div>
+            <div class="sg-sub">
+              <h3>Verificación y otros estados</h3>
+              <div class="cluster">
+                <span class="status status--ok">Verificada</span>
+                <span class="status status--pending">Pendiente</span>
+                <span class="status status--neutral">Declarada</span>
+                <span class="status status--warn">Vence en 3 días</span>
+                <span class="status status--danger">Rechazada</span>
+              </div>
+              <div class="alert alert--ok" role="status"><div class="alert-body"><span class="alert-title">Documento verificado</span>Identidad revisada por el equipo el 29 de octubre.</div></div>
+              <div class="alert alert--warn"><div class="alert-body"><span class="alert-title">La cita sigue sin confirmar</span>El proveedor tiene hasta mañana a las 6:00 p. m. (hora del centro).</div></div>
+              <div class="alert alert--danger" role="alert"><div class="alert-body"><span class="alert-title">No pudimos guardar los cambios</span>Se perdió la conexión. Revisa tu internet y vuelve a intentar.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 09 PROVEEDORES ============ -->
+    <section class="sg-section" id="proveedores" aria-labelledby="h-prov">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>09 · Proveedores</span></div>
+          <h2 id="h-prov">Fichas, no catálogo</h2>
+          <p>La ficha destacada abre con lo que da confianza: sello, calificación, trabajos concluidos y garantía. Debajo, filas con solo reglas para recorrer una lista larga. Responden al ancho de su caja, no de la pantalla.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-filters" role="search" aria-label="Filtrar proveedores">
+            <div class="field"><label class="field-label" for="p-ord">Ordenar por</label>
+              <select class="select" id="p-ord"><option>Calificación</option><option>Precio</option><option>Disponibilidad</option><option>Cercanía</option><option>Garantía</option></select></div>
+            <button class="chip" type="button" aria-pressed="true">Solo verificados</button>
+            <button class="chip" type="button" aria-pressed="false">Con experiencia similar</button>
+          </div>
+
+          <div class="sg-list" data-role="proveedor">
+            <article class="ficha" aria-labelledby="fp1">
+              <div class="ficha-inner">
+                <div class="ficha-id" aria-hidden="true">RC</div>
+                <div class="ficha-title">
+                  <h3 class="ficha-name" id="fp1">Ramón Cordero Vega</h3>
+                  <p class="ficha-meta">Trabajador independiente · Iztapalapa, CDMX · atiende 12 km a la redonda</p>
+                  <div class="cluster cluster--tight" style="margin-top:.35rem"><span class="sello">Verificado</span></div>
+                </div>
+                <div class="ficha-trades"><span class="chip"><span class="chip-key">PLO</span>Plomería</span><span class="chip"><span class="chip-key">IMP</span>Impermeabilización</span></div>
+                <dl class="ficha-facts">
+                  <div class="ficha-fact"><dt>Calificación</dt><dd>4.8 <small>/ 5 · 32 trabajos</small></dd></div>
+                  <div class="ficha-fact"><dt>Visita de diagnóstico</dt><dd>$350 <small>MXN</small></dd></div>
+                  <div class="ficha-fact"><dt>Garantía</dt><dd>90 <small>días</small></dd></div>
+                </dl>
+                <div class="ficha-actions"><span class="sg-note" style="margin:0">Próximo hueco: <strong>sáb 7 nov, 9:00 a. m.</strong></span><div class="cluster"><button class="btn btn-ghost btn-sm" type="button">Ver trabajos anteriores</button><button class="btn btn-primary btn-sm" type="button">Solicitar cotización</button></div></div>
+              </div>
+            </article>
+
+            <div>
+              <article class="ficha ficha--fila" aria-labelledby="fp2">
+                <div class="ficha-inner">
+                  <div class="ficha-id ficha-id--org" aria-hidden="true">CO</div>
+                  <div class="ficha-title">
+                    <h3 class="ficha-name" id="fp2">Cuadrilla Ocampo y Hermanos</h3>
+                    <p class="ficha-meta">Organización · Naucalpan, Edomex · 6 integrantes</p>
+                  </div>
+                  <div class="ficha-trades"><span class="chip"><span class="chip-key">ALB</span>Albañilería</span><span class="chip"><span class="chip-key">TAB</span>Tablaroca</span><span class="status status--pending">Documentos en revisión</span></div>
+                  <dl class="ficha-facts"><div class="ficha-fact"><dt>Calificación</dt><dd>4.6 <small>/ 5 · 18 trabajos</small></dd></div><div class="ficha-fact"><dt>Garantía</dt><dd>60 <small>días</small></dd></div></dl>
+                </div>
+              </article>
+              <article class="ficha ficha--fila" aria-labelledby="fp3">
+                <div class="ficha-inner">
+                  <div class="ficha-id" aria-hidden="true">MT</div>
+                  <div class="ficha-title">
+                    <h3 class="ficha-name" id="fp3">Marisol Téllez</h3>
+                    <p class="ficha-meta">Trabajadora independiente · Coyoacán, CDMX</p>
+                  </div>
+                  <div class="ficha-trades"><span class="chip"><span class="chip-key">ELE</span>Electricidad</span><span class="status status--ok">Verificada</span></div>
+                  <dl class="ficha-facts"><div class="ficha-fact"><dt>Calificación</dt><dd>4.9 <small>/ 5 · 51 trabajos</small></dd></div><div class="ficha-fact"><dt>Garantía</dt><dd>120 <small>días</small></dd></div></dl>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10 PRIVACIDAD ============ -->
+    <section class="sg-section" id="privacidad" aria-labelledby="h-priv" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>10 · Domicilio</span></div>
+          <h2 id="h-priv">Zona sí, calle no</h2>
+          <p>El domicilio exacto jamás se pinta como público. Por defecto se muestra una zona con el centro borrado a propósito (trama y círculo punteado). Solo tras autorizar aparece la cruz exacta, con borde sólido y el nombre de a quién se autorizó.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-sub">
+            <h3>Zona aproximada · <span class="sg-code">ZONA_APROXIMADA</span></h3>
+            <section class="zone zone--aprox" aria-labelledby="z1">
+              <div class="zone-inner">
+              <div class="zone-map" role="img" aria-label="Mapa esquemático: círculo punteado de aproximadamente un kilómetro; sin punto exacto"></div>
+              <div class="zone-body">
+                <div class="zone-label"><span class="status status--pending">Privado</span><span class="eyebrow" id="z1">Zona aproximada</span></div>
+                <p class="zone-place">Col. Narvarte, Benito Juárez</p>
+                <p class="zone-note">Esto es lo que ven los proveedores mientras revisan tu solicitud. Tu calle y número se quedan contigo.</p>
+              </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="sg-sub">
+            <h3>Domicilio autorizado · <span class="sg-code">DOMICILIO_AUTORIZADO</span></h3>
+            <section class="zone zone--autorizado" aria-labelledby="z2">
+              <div class="zone-inner">
+              <div class="zone-map" role="img" aria-label="Mapa esquemático con la ubicación exacta marcada con una cruz"></div>
+              <div class="zone-body">
+                <div class="zone-label"><span class="sello">Autorizado por ti</span><span class="eyebrow" id="z2">Domicilio exacto</span></div>
+                <address class="zone-address">Calle Pensilvania 142, int. 3<br>Col. Nápoles, 03810 Benito Juárez, CDMX</address>
+                <p class="zone-note">Compartido solo con <strong>Ramón Cordero Vega</strong> para el proyecto UC-2481.</p>
+              </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="sg-sub">
+            <h3>Oculto · <span class="sg-code">OCULTO</span></h3>
+            <section class="zone zone--oculto" aria-labelledby="z3">
+              <div class="zone-inner">
+              <div class="zone-map" role="img" aria-label="Ubicación oculta"></div>
+              <div class="zone-body">
+                <div class="zone-label"><span class="eyebrow" id="z3">Sin ubicación visible</span></div>
+                <p class="zone-note">Todavía no hay zona para mostrar. Cuando captures tu colonia, aparecerá aquí como zona aproximada.</p>
+              </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 11 VACÍOS / HOJA / NAV ============ -->
+    <section class="sg-section" id="vacios" aria-labelledby="h-vac">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>11 · Vacíos y hojas</span></div>
+          <h2 id="h-vac">Cuando no hay nada</h2>
+          <p>Un vacío dice qué falta, por qué importa y da la siguiente acción. La hoja inferior sustituye al modal: sube del borde en móvil y entra por la derecha en escritorio.</p>
+        </header>
+        <div class="sg-body">
+          <section class="empty" aria-labelledby="e1" data-role="cliente">
+            <div class="empty-inner">
+            <svg class="empty-figure" viewBox="0 0 176 128" fill="none" stroke="currentColor" aria-hidden="true">
+              <rect x="30" y="26" width="128" height="86" stroke-width="2" stroke-dasharray="7 6"/>
+              <path d="M30 14H158M30 9V19M158 9V19" stroke-width="1.5"/>
+              <path d="M16 26V112M11 26H21M11 112H21" stroke-width="1.5"/>
+              <path d="M44 98V60h5M44 98h38" stroke="var(--brick-600)" stroke-width="5" stroke-linejoin="miter"/>
+              <path d="M44 74h6M44 82h4M44 90h6M56 98v-5M64 98v-3M72 98v-5" stroke="var(--brick-600)" stroke-width="1.5"/>
+              <text x="94" y="14" font-family="Archivo" font-size="9" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" letter-spacing="1">0 PROYECTOS</text>
+            </svg>
+            <div class="empty-body">
+              <h3 class="empty-title" id="e1">Aún no tienes proyectos</h3>
+              <p class="empty-text">Cuéntanos qué hace falta en tu casa. Con tu colonia y un par de datos, los proveedores verificados de tu zona pueden mandarte propuesta.</p>
+              <div class="empty-actions"><button class="btn btn-primary" type="button">Crear mi primer proyecto</button><a class="btn btn-ghost" href="#oficios">Ver oficios disponibles</a></div>
+            </div>
+            </div>
+          </section>
+
+          <div class="sg-two">
+            <div class="sg-sub">
+              <h3>Hoja (sheet)</h3>
+              <p class="sg-note">Es un <span class="sg-code">&lt;dialog&gt;</span> nativo: Esc cierra, el foco queda atrapado y regresa al botón.</p>
+              <div class="cluster"><button class="btn btn-primary" type="button" id="open-sheet">Abrir la hoja</button></div>
+              <dialog class="sheet" id="sheet" aria-labelledby="sh-t">
+                <div class="sheet-grip" aria-hidden="true"></div>
+                <div class="sheet-head">
+                  <div><p class="eyebrow">Propuesta · UC-2481</p><h3 id="sh-t" style="margin-top:.25rem">Ramón Cordero Vega</h3></div>
+                  <button class="btn btn-ghost btn-sm" type="button" data-close-sheet aria-label="Cerrar">Cerrar</button>
+                </div>
+                <div class="sheet-body">
+                  <div class="cluster"><span class="status" data-status="CONFIRMADA">Confirmada</span><span class="chip"><span class="chip-key">PLO</span>Plomería</span></div>
+                  <dl class="sg-scale" style="border-top:1.5px solid var(--color-ink)">
+                    <div><dt>Costo de mano de obra</dt><dd><strong>$1,250.00 MXN</strong></dd></div>
+                    <div><dt>Materiales</dt><dd>Los compra el cliente.</dd></div>
+                    <div><dt>Fecha propuesta</dt><dd>Sáb 7 nov, 9:00 a. m. (hora del centro)</dd></div>
+                    <div><dt>Garantía</dt><dd>90 días</dd></div>
+                  </dl>
+                  <p class="sg-note">No hay pagos dentro de UnCalificado. El pago lo acuerdan entre ustedes.</p>
+                </div>
+                <div class="sheet-foot">
+                  <button class="btn btn-ghost" type="button">Pedir cambios</button>
+                  <button class="btn btn-primary" type="button" data-close-sheet>Aceptar propuesta</button>
+                </div>
+              </dialog>
+              <div class="sheet sheet--static" style="margin-top:var(--space-xs)" aria-label="Vista estática de la hoja">
+                <div class="sheet-grip" aria-hidden="true"></div>
+                <div class="sheet-head"><div><p class="eyebrow">Ejemplo en el flujo</p><h3 style="margin-top:.25rem">Filtros</h3></div></div>
+                <div class="sheet-body"><p class="sg-note">Contenido de la hoja. El pie queda fijo con las acciones.</p></div>
+                <div class="sheet-foot"><button class="btn btn-ghost" type="button">Limpiar</button><button class="btn btn-primary" type="button">Ver 14 proveedores</button></div>
+              </div>
+            </div>
+
+            <div class="sg-sub">
+              <h3>Navegación móvil</h3>
+              <p class="sg-note">Barra inferior para el pulgar. La cinta de rol pasa a la regla superior de la pestaña activa.</p>
+              <div class="sg-phone" data-role="proveedor">
+                <div class="sg-phone-screen">
+                  <span class="role-tag" style="justify-self:start">Proveedor</span>
+                  <h3 style="text-transform:uppercase;font-stretch:72%">Solicitudes</h3>
+                  <p class="sg-note">3 nuevas · 1 por confirmar</p>
+                </div>
+                <nav class="nav nav--tabs nav--static" aria-label="Principal">
+                  <div class="nav-inner"><ul class="nav-links" style="display:grid;list-style:none">
+                    <li><a class="nav-link" href="#vacios" aria-current="page">Solicitudes</a></li>
+                    <li><a class="nav-link" href="#vacios">Agenda</a></li>
+                    <li><a class="nav-link" href="#vacios">Mensajes</a></li>
+                    <li><a class="nav-link" href="#vacios">Perfil</a></li>
+                  </ul></div>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 12 LOGIN ============ -->
+    <section class="sg-section" id="login" aria-labelledby="h-login" style="background:var(--color-surface)">
+      <div class="container">
+        <header class="sg-head">
+          <div class="cota"><span>12 · Entrada</span></div>
+          <h2 id="h-login">Pantalla de entrada</h2>
+          <p>Fragmento de login. Izquierda, el plano; derecha, el formulario. En móvil el plano baja a una franja. Pruébalo: el botón muestra el error con el tono correcto.</p>
+        </header>
+        <div class="sg-body">
+          <div class="sg-login" data-role="cliente">
+            <div class="sg-login-art">
+              <svg class="sg-art-mark" viewBox="0 0 32 32" aria-hidden="true"><use href="#uc-mark"/></svg>
+              <span class="wordmark" role="img" aria-label="UnCalificado" style="position:relative"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+              <div class="stack stack--md">
+                <h3>Entra y sigue<em>con tu proyecto.</em></h3>
+                <p>Tu domicilio exacto solo lo ve quien tú autorices.</p>
+              </div>
+            </div>
+            <form class="sg-login-form" id="login-form" novalidate aria-labelledby="l-t">
+              <h3 id="l-t">Entrar</h3>
+              <div class="alert alert--danger" id="login-alert" role="alert" hidden><div class="alert-body"><span class="alert-title">Correo o contraseña incorrectos</span>Revísalos e intenta de nuevo. Si no recuerdas tu contraseña, puedes cambiarla.</div></div>
+              <div class="field" id="l-f1">
+                <label class="field-label" for="l-correo">Correo electrónico</label>
+                <input class="input" id="l-correo" name="correo" type="email" inputmode="email" autocomplete="username" placeholder="nombre@correo.mx" required>
+              </div>
+              <div class="field">
+                <label class="field-label" for="l-pass">Contraseña</label>
+                <div class="input-group">
+                  <input class="input" id="l-pass" name="pass" type="password" autocomplete="current-password" required>
+                  <button class="btn" type="button" data-toggle-pass="l-pass" aria-controls="l-pass">Mostrar</button>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Entrar</button>
+              <p class="fine"><a href="#login">Olvidé mi contraseña</a></p>
+              <hr>
+              <p class="fine">¿Primera vez en UnCalificado? <a href="#formularios">Crea tu cuenta</a>. UnCalificado no cobra ni procesa pagos.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sg-foot on-dark">
+    <div class="container">
+      <span class="wordmark" role="img" aria-label="UnCalificado"><svg class="wordmark-mark" aria-hidden="true"><use href="#uc-mark"/></svg><span><span class="wordmark-un">Un</span><span class="wordmark-cal">Calificado</span></span></span>
+      <p>Guía de estilo · Taller editorial. Fuentes: Archivo y Atkinson Hyperlegible Next (Google Fonts). Archivos: <a href="./tokens.css">tokens.css</a> · <a href="./components.css">components.css</a> · <a href="./DIRECTION.md">DIRECTION.md</a> · <a href="./COPY.md">COPY.md</a>.</p>
+      <p>Tus derechos ARCO (acceso, rectificación, cancelación y oposición) los atiende nuestro equipo desde tu cuenta.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+
+      // Cambio de rol global (solo demostración)
+      var sw = document.getElementById('role-switch');
+      sw.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-set-role]'); if (!b) return;
+        root.setAttribute('data-role', b.getAttribute('data-set-role'));
+        sw.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      });
+
+      // Chips de filtro (aria-pressed)
+      document.addEventListener('click', function (e) {
+        var c = e.target.closest('button.chip[aria-pressed]'); if (!c) return;
+        c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'));
+      });
+
+      // Mostrar / ocultar contraseña
+      document.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-toggle-pass]'); if (!t) return;
+        var inp = document.getElementById(t.getAttribute('data-toggle-pass'));
+        var show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        t.textContent = show ? 'Ocultar' : 'Mostrar';
+      });
+
+      // Hoja
+      var sheet = document.getElementById('sheet'), openBtn = document.getElementById('open-sheet');
+      openBtn.addEventListener('click', function () { sheet.showModal(); });
+      sheet.addEventListener('click', function (e) {
+        if (e.target === sheet || e.target.closest('[data-close-sheet]')) sheet.close();
+      });
+
+      // Demo de error en login
+      var form = document.getElementById('login-form'), alertBox = document.getElementById('login-alert');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        alertBox.hidden = false;
+        alertBox.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
+    })();
+  </script>
+</body>
+</html>

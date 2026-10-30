@@ -17,6 +17,7 @@ from .domain import (
     serialize_provider,
     utcnow,
 )
+from .geo import canonical_zone, clamp_radius, within_radius
 from .errors import ApiError, validation_error
 from .models import (
     FileType,
@@ -121,14 +122,23 @@ def list_providers():
     db = SessionLocal()
     try:
         expire_pending_entities(db)
-        providers = [
-            provider
-            for provider in db.scalars(select(Provider)).all()
-            if is_complete_provider(provider) and _matches_filters(provider, request.args, db)
-        ]
+        origin = canonical_zone(request.args.get("zona")) or canonical_zone(user.search_zone)
+        radius = clamp_radius(user.max_distance_km)
+        providers = []
+        for provider in db.scalars(select(Provider)).all():
+            if not is_complete_provider(provider) or not _matches_filters(
+                provider, request.args, db
+            ):
+                continue
+            nearby, _distance = within_radius(
+                origin, radius, [item.zone for item in provider.coverage]
+            )
+            if origin and not nearby:
+                continue
+            providers.append(provider)
         providers.sort(
             key=lambda item: _sort_key(
-                item, db, request.args.get("ordenarPor"), request.args.get("zona")
+                item, db, request.args.get("ordenarPor"), origin
             )
         )
         start = (pagination.page - 1) * pagination.page_size

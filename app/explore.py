@@ -14,6 +14,13 @@ from .domain import (
     serialize_request,
 )
 from .errors import ApiError, validation_error
+from .geo import (
+    DEFAULT_DISTANCE_KM,
+    canonical_zone,
+    clamp_radius,
+    zone_catalog,
+    within_radius,
+)
 from .models import (
     FileType,
     ProjectStatus,
@@ -23,7 +30,7 @@ from .models import (
     UserRole,
 )
 from .schemas import ContactRequest, PageQuery, page_info
-from .security import get_current_user
+from .security import get_current_user, optional_user
 
 router = Blueprint("explore", __name__)
 PUBLIC_WORK_STATUSES = {ProjectStatus.TERMINADO, ProjectStatus.CONCLUIDO}
@@ -38,7 +45,9 @@ def _concluded_count(db: Session, provider_id) -> int:
     ) or 0
 
 
-def serialize_explore_provider(provider: Provider, db: Session) -> dict:
+def serialize_explore_provider(
+    provider: Provider, db: Session, distance_km: float | None = None
+) -> dict:
     cover = next(
         (item for item in provider.portfolio_files if item.file_type == FileType.IMAGE),
         None,
@@ -56,7 +65,28 @@ def serialize_explore_provider(provider: Provider, db: Session) -> dict:
         "concludedCount": _concluded_count(db, provider.id),
         "coverImage": serialize_file(cover) if cover else None,
     }
+    if distance_km is not None:
+        payload["distanceKm"] = distance_km
     return payload
+
+
+def discovery_query():
+    user = optional_user()
+    zona = canonical_zone(request.args.get("zona"))
+    radio = request.args.get("radioKm")
+    try:
+        radius = clamp_radius(int(radio) if radio else DEFAULT_DISTANCE_KM)
+    except (TypeError, ValueError):
+        radius = DEFAULT_DISTANCE_KM
+    if zona:
+        return zona, radius, True
+    if user and user.search_zone:
+        return (
+            canonical_zone(user.search_zone),
+            clamp_radius(user.max_distance_km),
+            True,
+        )
+    return None, DEFAULT_DISTANCE_KM, False
 
 
 def _popular_sort(provider: Provider, db: Session):
@@ -64,25 +94,55 @@ def _popular_sort(provider: Provider, db: Session):
     return (-rating["average"], -rating["count"], -_concluded_count(db, provider.id))
 
 
+@router.get("/zones")
+def list_zones():
+    return jsonify({"items": zone_catalog()})
+
+
 @router.get("/providers")
 def list_popular_providers():
     pagination = PageQuery.model_validate(request.args.to_dict())
     oficio = request.args.get("oficio")
+    origin, radius, applied = discovery_query()
     db = SessionLocal()
     try:
-        providers = [
-            provider
-            for provider in db.scalars(select(Provider)).all()
-            if is_complete_provider(provider)
-            and (not oficio or oficio in {item.trade for item in provider.trades})
-        ]
-        providers.sort(key=lambda item: _popular_sort(item, db))
+        ranked = []
+        for provider in db.scalars(select(Provider)).all():
+            if not is_complete_provider(provider):
+                continue
+            if oficio and oficio not in {item.trade for item in provider.trades}:
+                continue
+            nearby, distance = within_radius(
+                origin, radius, [item.zone for item in provider.coverage]
+            )
+            if applied and not nearby:
+                continue
+            ranked.append((distance if distance is not None else 10**6, provider))
+        if applied:
+            ranked.sort(key=lambda item: (item[0], *_popular_sort(item[1], db)))
+        else:
+            ranked.sort(key=lambda item: _popular_sort(item[1], db))
         start = (pagination.page - 1) * pagination.page_size
-        page_items = providers[start : start + pagination.page_size]
+        page_items = ranked[start : start + pagination.page_size]
         return jsonify(
             {
-                "items": [serialize_explore_provider(item, db) for item in page_items],
-                "page": page_info(pagination.page, pagination.page_size, len(providers)),
+                "items": [
+                    serialize_explore_provider(item, db, distance if applied else None)
+                    for distance, item in page_items
+                ],
+                "page": page_info(pagination.page, pagination.page_size, len(ranked)),
+                "discovery": {
+                    "applied": applied,
+                    "searchZone": origin,
+                    "maxDistanceKm": radius,
+                },
+                "noResultsMessage": None
+                if ranked
+                else (
+                    f"No hay calificados a menos de {radius} km de {origin}."
+                    if applied
+                    else "No hay calificados públicos todavía."
+                ),
             }
         )
     finally:
@@ -165,6 +225,7 @@ def _work_from_file(stored: StoredFile, db: Session) -> dict | None:
 def list_public_works():
     pagination = PageQuery.model_validate(request.args.to_dict())
     oficio = request.args.get("oficio")
+    origin, radius, applied = discovery_query()
     db = SessionLocal()
     try:
         files = db.scalars(
@@ -177,6 +238,11 @@ def list_public_works():
                 continue
             if oficio and item["trade"] != oficio:
                 continue
+            nearby, _distance = within_radius(
+                origin, radius, item["provider"].get("coverage") or []
+            )
+            if applied and not nearby:
+                continue
             works.append(item)
         works.sort(key=lambda item: (-item["provider"]["rating"]["average"], item["fileName"]))
         start = (pagination.page - 1) * pagination.page_size
@@ -185,6 +251,11 @@ def list_public_works():
             {
                 "items": page_items,
                 "page": page_info(pagination.page, pagination.page_size, len(works)),
+                "discovery": {
+                    "applied": applied,
+                    "searchZone": origin,
+                    "maxDistanceKm": radius,
+                },
             }
         )
     finally:

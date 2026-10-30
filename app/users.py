@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from .database import SessionLocal
 from .errors import validation_error
+from .geo import canonical_zone, clamp_radius
 from .models import User
 from .schemas import UserUpdateRequest
 from .security import get_current_user
@@ -20,6 +21,10 @@ def serialize_user(user) -> dict:
         "created_at": user.created_at.isoformat(),
         "name": user.name,
         "phone": user.phone,
+        "searchZone": user.search_zone,
+        "search_zone": user.search_zone,
+        "maxDistanceKm": user.max_distance_km,
+        "max_distance_km": user.max_distance_km,
     }
 
 
@@ -42,6 +47,10 @@ def patch_me():
             user.name = payload.name
         if payload.phone is not None:
             user.phone = payload.phone
+        if payload.search_zone is not None:
+            user.search_zone = canonical_zone(payload.search_zone)
+        if payload.max_distance_km is not None:
+            user.max_distance_km = clamp_radius(payload.max_distance_km)
         db.commit()
         db.refresh(user)
         return jsonify(serialize_user(user))

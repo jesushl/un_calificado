@@ -76,6 +76,8 @@ def _seed_core(db: Session) -> None:
         role=UserRole.CLIENTE,
         privacy_consent_version="2026-01",
         adult_declaration=True,
+        search_zone="Coyoacán",
+        max_distance_km=15,
     )
     provider_user = User(
         email="demo.proveedor@example.com",
@@ -316,6 +318,9 @@ def _seed_gallery(db: Session) -> None:
     client = db.scalar(select(User).where(User.email == "demo.cliente@example.com"))
     if client is None:
         return
+    if not client.search_zone:
+        client.search_zone = "Coyoacán"
+        client.max_distance_km = 15
     demo_provider = db.scalar(
         select(Provider).where(Provider.name == "Construcciones Demo MX")
     )

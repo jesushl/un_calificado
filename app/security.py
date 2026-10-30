@@ -99,6 +99,10 @@ def get_current_user() -> User:
     return current_user
 
 
+def optional_user() -> User | None:
+    return getattr(g, "current_user", None)
+
+
 def require_roles(*allowed_roles: UserRole):
     """Decorador Flask para reforzar permisos en una vista específica."""
 

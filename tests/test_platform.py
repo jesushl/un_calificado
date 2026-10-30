@@ -15,6 +15,11 @@ def test_consent_logout_and_user_patch():
             headers=auth_header(token),
             json={"name": "Ana Cliente", "phone": "5550001111"},
         )
+        zona = client.patch(
+            "/api/v1/users/me",
+            headers=auth_header(token),
+            json={"searchZone": "Benito Juárez", "maxDistanceKm": 12},
+        )
         logout = client.post("/api/v1/auth/logout", headers=auth_header(token))
         me = client.get("/api/v1/auth/me", headers=auth_header(token))
 
@@ -22,6 +27,9 @@ def test_consent_logout_and_user_patch():
     assert consent.get_json()["privacyVersion"] == "2026-02"
     assert patched.status_code == 200
     assert patched.get_json()["name"] == "Ana Cliente"
+    assert zona.status_code == 200
+    assert zona.get_json()["searchZone"] == "Benito Juárez"
+    assert zona.get_json()["maxDistanceKm"] == 12
     assert logout.status_code == 204
     assert me.status_code == 401
 

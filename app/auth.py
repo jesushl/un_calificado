@@ -23,13 +23,12 @@ from .oauth import (
 from .config import get_settings
 from .rate_limit import enforce_rate_limit
 from .schemas import (
-    AuthResponse,
     ConsentRequest,
     LoginRequest,
     OAuthExchange,
     RegisterRequest,
-    UserResponse,
 )
+from .users import serialize_user
 from .security import (
     AuthenticationError,
     create_access_token,
@@ -47,7 +46,16 @@ def _validation_response(error: ValidationError):
 
 
 def _user_response(user: User) -> dict:
-    return UserResponse.model_validate(user).model_dump(mode="json")
+    return serialize_user(user)
+
+
+def _auth_payload(token: str, expires_in: int, user: User) -> dict:
+    return {
+        "access_token": token,
+        "token_type": "Bearer",
+        "expires_in": expires_in,
+        "user": serialize_user(user),
+    }
 
 
 def register_user(payload: RegisterRequest, db: Session) -> User:
@@ -115,8 +123,7 @@ def login():
             )
 
         token, expires_in = create_access_token(user)
-        response = AuthResponse(access_token=token, expires_in=expires_in, user=user)
-        return jsonify(response.model_dump(mode="json")), 200
+        return jsonify(_auth_payload(token, expires_in, user)), 200
     finally:
         db.close()
 
@@ -261,8 +268,7 @@ def oauth_exchange():
         user, _next_path = consume_ticket(db, payload.code)
         token, expires_in = create_access_token(user)
         db.commit()
-        response = AuthResponse(access_token=token, expires_in=expires_in, user=user)
-        return jsonify(response.model_dump(mode="json"))
+        return jsonify(_auth_payload(token, expires_in, user))
     finally:
         db.close()
 
@@ -288,7 +294,6 @@ def oauth_dev(provider: str):
         user = upsert_oauth_user(db, profile, role)
         token, expires_in = create_access_token(user)
         db.commit()
-        response = AuthResponse(access_token=token, expires_in=expires_in, user=user)
-        return jsonify(response.model_dump(mode="json"))
+        return jsonify(_auth_payload(token, expires_in, user))
     finally:
         db.close()

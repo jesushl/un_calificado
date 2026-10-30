@@ -150,6 +150,54 @@ def test_client_can_contact_and_provider_cannot():
     assert created.get_json()["approximateZone"] == "Coyoacán"
 
 
+def test_discovery_radius_hides_providers_outside_the_alcaldia():
+    _gallery_provider()
+    with app.test_client() as client:
+        nearby = client.get("/api/v1/explore/providers?zona=Coyoacán&radioKm=5")
+        farther = client.get("/api/v1/explore/providers?zona=Coyoacán&radioKm=20")
+        zones = client.get("/api/v1/explore/zones")
+
+    names_near = [item["name"] for item in nearby.get_json()["items"]]
+    names_far = [item["name"] for item in farther.get_json()["items"]]
+    assert nearby.status_code == 200
+    assert "Herrería La Palma" not in names_near
+    assert nearby.get_json()["discovery"]["applied"] is True
+    assert farther.status_code == 200
+    assert "Herrería La Palma" in names_far
+    assert any(item["id"] == "Coyoacán" for item in zones.get_json()["items"])
+
+
+def test_account_discovery_settings_filter_explore():
+    provider_id = _gallery_provider()
+    with app.test_client() as client:
+        token = token_for(client, "ana.zona@example.com")
+        saved = client.patch(
+            "/api/v1/users/me",
+            headers=auth_header(token),
+            json={"searchZone": "Coyoacán", "maxDistanceKm": 5},
+        )
+        filtered = client.get(
+            "/api/v1/explore/providers",
+            headers=auth_header(token),
+        )
+        wide = client.patch(
+            "/api/v1/users/me",
+            headers=auth_header(token),
+            json={"maxDistanceKm": 20},
+        )
+        listed = client.get(
+            "/api/v1/explore/providers",
+            headers=auth_header(token),
+        )
+
+    assert saved.status_code == 200
+    assert saved.get_json()["searchZone"] == "Coyoacán"
+    assert saved.get_json()["maxDistanceKm"] == 5
+    assert provider_id not in [item["id"] for item in filtered.get_json()["items"]]
+    assert wide.status_code == 200
+    assert any(item["id"] == provider_id for item in listed.get_json()["items"])
+
+
 def test_signed_work_photo_is_public():
     _gallery_provider()
     with app.test_client() as client:

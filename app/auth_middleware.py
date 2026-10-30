@@ -39,6 +39,22 @@ def register_auth_middleware(app):
         if method == "OPTIONS":
             return ("", 204)
         if is_public_route(method, path):
+            if method == "GET" and "/explore" in path:
+                authorization = request.headers.get("Authorization", "")
+                scheme, _, token = authorization.partition(" ")
+                if scheme.lower() == "bearer" and token:
+                    db: Session = SessionLocal()
+                    try:
+                        try:
+                            g.current_user = user_from_token(token, db)
+                        except AuthenticationError:
+                            return (
+                                jsonify({"detail": "Credenciales inválidas o token ausente"}),
+                                401,
+                                {"WWW-Authenticate": "Bearer"},
+                            )
+                    finally:
+                        db.close()
             return None
         if not path.startswith("/api"):
             return None

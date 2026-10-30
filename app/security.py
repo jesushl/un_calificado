@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import bcrypt
 import jwt
@@ -8,7 +8,7 @@ from flask import g, jsonify
 from sqlalchemy.orm import Session
 
 from .config import get_settings
-from .models import User, UserRole, UserStatus
+from .models import RevokedToken, User, UserRole, UserStatus
 
 
 class AuthenticationError(Exception):
@@ -36,6 +36,7 @@ def create_access_token(user: User) -> tuple[str, int]:
     payload = {
         "sub": str(user.id),
         "role": user.role.value,
+        "jti": str(uuid4()),
         "iat": now,
         "exp": expires_at,
     }
@@ -51,23 +52,42 @@ def authentication_error() -> AuthenticationError:
     return AuthenticationError("Credenciales inválidas o token ausente")
 
 
-def user_from_token(token: str, db: Session) -> User:
+def _decode_token(token: str) -> dict:
     settings = get_settings()
+    secrets = [settings.jwt_secret]
+    if settings.jwt_secret_previous:
+        secrets.append(settings.jwt_secret_previous)
+    last_error: Exception | None = None
+    for secret in secrets:
+        try:
+            return jwt.decode(
+                token,
+                secret,
+                algorithms=[settings.jwt_algorithm],
+                options={"require": ["sub", "role", "iat", "exp"]},
+            )
+        except jwt.InvalidTokenError as error:
+            last_error = error
+    raise last_error or jwt.InvalidTokenError("token inválido")
+
+
+def user_from_token(token: str, db: Session) -> User:
     try:
-        payload = jwt.decode(
-            token,
-            settings.jwt_secret,
-            algorithms=[settings.jwt_algorithm],
-            options={"require": ["sub", "role", "iat", "exp"]},
-        )
+        payload = _decode_token(token)
         user_id = UUID(payload["sub"])
         token_role = UserRole(payload["role"])
+        jti = payload.get("jti")
     except (jwt.InvalidTokenError, ValueError, KeyError):
         raise authentication_error() from None
+
+    if jti and db.get(RevokedToken, jti) is not None:
+        raise authentication_error()
 
     user = db.get(User, user_id)
     if user is None or user.status != UserStatus.ACTIVE or user.role != token_role:
         raise authentication_error()
+    g.token_jti = jti
+    g.token_exp = payload.get("exp")
     return user
 
 

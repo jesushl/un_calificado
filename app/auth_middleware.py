@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from flask import g, jsonify, request
 from sqlalchemy.orm import Session
 
@@ -31,6 +33,7 @@ def register_auth_middleware(app):
 
     @app.before_request
     def authenticate_request():
+        g.request_id = request.headers.get("X-Request-Id", str(uuid4()))
         method = request.method.upper()
         path = request.path
         if method == "OPTIONS" or (method, path) in PUBLIC_ROUTES or path == "/health":

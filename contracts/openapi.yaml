@@ -16,6 +16,7 @@ servers:
     description: Producción
 tags:
   - name: auth
+  - name: explore
   - name: users
   - name: providers
   - name: requests
@@ -92,6 +93,128 @@ paths:
       responses:
         '204': {description: Sesión invalidada}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /auth/oauth/providers:
+    get:
+      tags: [auth]
+      security: []
+      summary: Proveedores OAuth disponibles
+      operationId: listOAuthProviders
+      x-acceptance-criteria: [RF-01-AC-1]
+      responses:
+        '200': {description: Google, Facebook y TikTok, content: {application/json: {schema: {$ref: '#/components/schemas/OAuthProviderPage'}}}}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /auth/oauth/{provider}:
+    get:
+      tags: [auth]
+      security: []
+      summary: Iniciar OAuth con Google, Facebook o TikTok
+      operationId: startOAuth
+      x-acceptance-criteria: [RF-01-AC-1, RF-02-AC-1]
+      parameters:
+        - {name: provider, in: path, required: true, schema: {type: string, enum: [google, facebook, tiktok]}}
+        - {name: role, in: query, schema: {type: string, enum: [CLIENTE, PROVEEDOR]}}
+        - {name: next, in: query, schema: {type: string}}
+      responses:
+        '200': {description: URL de autorización, content: {application/json: {schema: {$ref: '#/components/schemas/OAuthStart'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '503': {description: El proveedor OAuth no está configurado}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /auth/oauth/{provider}/callback:
+    get:
+      tags: [auth]
+      security: []
+      summary: Callback OAuth
+      operationId: oauthCallback
+      x-acceptance-criteria: [RF-01-AC-1, RF-02-AC-1]
+      parameters:
+        - {name: provider, in: path, required: true, schema: {type: string, enum: [google, facebook, tiktok]}}
+        - {name: code, in: query, schema: {type: string}}
+        - {name: state, in: query, schema: {type: string}}
+        - {name: error, in: query, schema: {type: string}}
+      responses:
+        '302': {description: Redirige al cliente web con un código de un solo uso}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /auth/oauth/exchange:
+    post:
+      tags: [auth]
+      security: []
+      summary: Canjear el código OAuth de un solo uso por JWT
+      operationId: exchangeOAuth
+      x-acceptance-criteria: [RF-01-AC-1]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: {type: string}
+      responses:
+        '200': {description: Sesión iniciada, content: {application/json: {schema: {$ref: '#/components/schemas/AuthResponse'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /explore/providers:
+    get:
+      tags: [explore, providers]
+      security: []
+      summary: Calificados más populares para el índice público
+      operationId: listPopularProviders
+      x-acceptance-criteria: [RF-07-AC-1, RF-07-AC-4, RF-26-AC-1, RNF-04-AC-2]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+        - {name: oficio, in: query, schema: {type: string}}
+      responses:
+        '200': {description: Perfiles públicos sin domicilio exacto, content: {application/json: {schema: {$ref: '#/components/schemas/ExploreProviderPage'}}}}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /explore/providers/{providerId}:
+    get:
+      tags: [explore, providers]
+      security: []
+      summary: Ficha pública de un calificado
+      operationId: getPublicProvider
+      x-acceptance-criteria: [RF-07-AC-1, RF-07-AC-4, RF-53-AC-1, RNF-04-AC-2]
+      parameters: [{$ref: '#/components/parameters/ProviderId'}]
+      responses:
+        '200': {description: Perfil público, content: {application/json: {schema: {$ref: '#/components/schemas/ExploreProvider'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/ServerError'}
+    post:
+      tags: [explore]
+      summary: Contactar a un calificado (solo cuenta autenticada)
+      operationId: contactProvider
+      x-acceptance-criteria: [RF-01-AC-1, RF-13-AC-1, RNF-04-AC-1]
+      parameters: [{$ref: '#/components/parameters/ProviderId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ContactRequest'}
+      responses:
+        '201': {description: Borrador de proyecto para contactar, content: {application/json: {schema: {$ref: '#/components/schemas/ServiceRequest'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /explore/works:
+    get:
+      tags: [explore, files]
+      security: []
+      summary: Fotos de proyectos realizados para el índice público
+      operationId: listPublicWorks
+      x-acceptance-criteria: [RF-04-AC-1, RF-07-AC-1, RF-52-AC-1, RNF-04-AC-2]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+        - {name: oficio, in: query, schema: {type: string}}
+      responses:
+        '200': {description: Galería de obra sin domicilio exacto, content: {application/json: {schema: {$ref: '#/components/schemas/ExploreWorkPage'}}}}
         '500': {$ref: '#/components/responses/ServerError'}
   /users/me:
     get:
@@ -1154,6 +1277,71 @@ components:
       properties:
         items: {type: array, items: {$ref: '#/components/schemas/File'}}
         page: {$ref: '#/components/schemas/PageInfo'}
+    OAuthProvider:
+      type: object
+      required: [id, label, configured]
+      properties:
+        id: {type: string, enum: [google, facebook, tiktok]}
+        label: {type: string}
+        configured: {type: boolean}
+    OAuthProviderPage:
+      type: object
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/OAuthProvider'}}
+    OAuthStart:
+      type: object
+      required: [authorizationUrl, provider]
+      properties:
+        authorizationUrl: {type: string, format: uri}
+        provider: {type: string, enum: [google, facebook, tiktok]}
+    ExploreProvider:
+      type: object
+      required: [id, name, modality, trades, coverage, verified, rating]
+      properties:
+        id: {$ref: '#/components/schemas/Uuid'}
+        name: {type: string}
+        modality: {type: string, enum: [TRABAJADOR, ORGANIZACION]}
+        trades: {type: array, items: {type: string}}
+        coverage: {type: array, items: {type: string}}
+        experienceYears: {type: integer}
+        generalAvailability: {type: string}
+        verified: {type: boolean}
+        rating: {$ref: '#/components/schemas/RatingSummary'}
+        concludedCount: {type: integer}
+        coverImage: {$ref: '#/components/schemas/File'}
+    ExploreProviderPage:
+      type: object
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/ExploreProvider'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    ExploreWork:
+      type: object
+      required: [id, fileName, contentType, downloadUrl, trade, expectedOutcome, approximateZone, provider]
+      properties:
+        id: {$ref: '#/components/schemas/Uuid'}
+        fileName: {type: string}
+        contentType: {type: string}
+        downloadUrl: {type: string}
+        downloadUrlExpiresAt: {$ref: '#/components/schemas/DateTime'}
+        trade: {type: string}
+        expectedOutcome: {type: string}
+        approximateZone: {type: string}
+        provider: {$ref: '#/components/schemas/ExploreProvider'}
+    ExploreWorkPage:
+      type: object
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/ExploreWork'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    ContactRequest:
+      type: object
+      required: [expectedOutcome, approximateZone]
+      properties:
+        expectedOutcome: {type: string, minLength: 1}
+        approximateZone: {type: string, minLength: 1}
+        trade: {type: string}
     MessagePage:
       type: object
       required: [items, page]

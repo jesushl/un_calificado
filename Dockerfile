@@ -18,7 +18,7 @@ COPY .env.example .
 RUN chmod +x docker-entrypoint.sh
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /data/objects
 
 EXPOSE 8000
 

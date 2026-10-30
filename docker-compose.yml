@@ -26,6 +26,17 @@ services:
       JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-30}
       PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-10}
+      OBJECT_STORE_PATH: /data/objects
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://127.0.0.1:8000}
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+      OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      OAUTH_FACEBOOK_CLIENT_ID: ${OAUTH_FACEBOOK_CLIENT_ID:-}
+      OAUTH_FACEBOOK_CLIENT_SECRET: ${OAUTH_FACEBOOK_CLIENT_SECRET:-}
+      OAUTH_TIKTOK_CLIENT_KEY: ${OAUTH_TIKTOK_CLIENT_KEY:-}
+      OAUTH_TIKTOK_CLIENT_SECRET: ${OAUTH_TIKTOK_CLIENT_SECRET:-}
+    volumes:
+      - object_store:/data/objects
     depends_on:
       db:
         condition: service_healthy
@@ -35,11 +46,16 @@ services:
     profiles: ["seed"]
     command: ["python", "-m", "app.seed"]
     environment:
+      APP_ENV: ${APP_ENV:-development}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-uncalificado}:${POSTGRES_PASSWORD:-uncalificado_dev_password}@db:5432/${POSTGRES_DB:-uncalificado}
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env antes de cargar datos}
+      OBJECT_STORE_PATH: /data/objects
+    volumes:
+      - object_store:/data/objects
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   postgres_data:
+  object_store:

@@ -5,6 +5,8 @@ import pytest
 os.environ.setdefault("JWT_SECRET", "test-secret-that-is-long-enough")
 os.environ.setdefault("JWT_EXPIRATION", "30")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+os.environ.setdefault("AUTH_RATE_LIMIT", "1000")
+os.environ.setdefault("APP_ENV", "test")
 
 
 @pytest.fixture(autouse=True)

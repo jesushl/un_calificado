@@ -1,12 +1,23 @@
-from flask import Blueprint, jsonify, request
+from datetime import datetime, timezone
+
+from flask import Blueprint, g, jsonify, request
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import SessionLocal
-from .models import User, UserRole, UserStatus
-from .schemas import AuthResponse, LoginRequest, RegisterRequest, UserResponse
+from .errors import validation_error
+from .models import Consent, RevokedToken, User, UserRole, UserStatus
+from .config import get_settings
+from .rate_limit import enforce_rate_limit
+from .schemas import (
+    AuthResponse,
+    ConsentRequest,
+    LoginRequest,
+    RegisterRequest,
+    UserResponse,
+)
 from .security import (
     AuthenticationError,
     create_access_token,
@@ -51,6 +62,7 @@ def register_user(payload: RegisterRequest, db: Session) -> User:
 
 @router.post("/register")
 def register():
+    enforce_rate_limit("auth.register", limit=get_settings().auth_rate_limit)
     try:
         payload = RegisterRequest.model_validate(request.get_json(silent=True) or {})
     except ValidationError as error:
@@ -69,6 +81,7 @@ def register():
 
 @router.post("/login")
 def login():
+    enforce_rate_limit("auth.login", limit=get_settings().auth_rate_limit)
     try:
         payload = LoginRequest.model_validate(request.get_json(silent=True) or {})
     except ValidationError as error:
@@ -101,6 +114,63 @@ def me():
         return jsonify(_user_response(get_current_user()))
     except AuthenticationError:
         return jsonify({"detail": "Credenciales inválidas o token ausente"}), 401
+
+
+@router.post("/consents")
+def create_consent():
+    try:
+        payload = ConsentRequest.model_validate(request.get_json(silent=True) or {})
+    except ValidationError as error:
+        return validation_error(error)
+
+    current_user = get_current_user()
+    db = SessionLocal()
+    try:
+        user = db.get(User, current_user.id)
+        consent = Consent(
+            user_id=user.id,
+            privacy_version=payload.privacy_version,
+            adult_declaration=payload.adult_declaration,
+        )
+        user.privacy_consent_version = payload.privacy_version
+        user.adult_declaration = payload.adult_declaration
+        db.add(consent)
+        db.commit()
+        db.refresh(consent)
+        return (
+            jsonify(
+                {
+                    "id": str(consent.id),
+                    "privacyVersion": consent.privacy_version,
+                    "acceptedAt": consent.accepted_at.isoformat(),
+                }
+            ),
+            201,
+        )
+    finally:
+        db.close()
+
+
+@router.post("/logout")
+def logout():
+    current_user = get_current_user()
+    jti = getattr(g, "token_jti", None)
+    exp = getattr(g, "token_exp", None)
+    if jti:
+        db = SessionLocal()
+        try:
+            expires_at = (
+                datetime.fromtimestamp(int(exp), tz=timezone.utc)
+                if exp
+                else datetime.now(timezone.utc)
+            )
+            db.merge(
+                RevokedToken(jti=jti, user_id=current_user.id, expires_at=expires_at)
+            )
+            db.commit()
+        finally:
+            db.close()
+    return ("", 204)
 
 
 @router.get("/admin/ping")

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import select
 
+from .config import get_settings
 from .database import Base, SessionLocal, engine
 from .models import (
     Appointment,
@@ -42,6 +43,8 @@ from .security import hash_password
 
 
 def seed() -> None:
+    if get_settings().app_env not in {"development", "test"}:
+        raise SystemExit("Los datos demo solo se cargan en development o test.")
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:

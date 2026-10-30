@@ -1,7 +1,7 @@
 from datetime import timedelta
 from uuid import uuid4
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from pydantic import ValidationError
 from sqlalchemy import select
 
@@ -22,7 +22,7 @@ from .models import (
 )
 from .schemas import PrivacyFulfillment, PrivacyRequestCreate
 from .security import get_current_user
-from .storage import verify_signed_download
+from .storage import object_path, verify_signed_download
 
 privacy = Blueprint("privacy", __name__)
 admin = Blueprint("admin", __name__)
@@ -145,7 +145,6 @@ def availability_report():
 
 @files.get("/<file_id>/content")
 def download_file(file_id: str):
-    get_current_user()
     db = SessionLocal()
     try:
         stored = db.get(StoredFile, parse_uuid(file_id, "fileId"))
@@ -158,6 +157,16 @@ def download_file(file_id: str):
             request.args.get("sig", ""),
         ):
             raise ApiError(403, "FORBIDDEN", "La URL temporal no es válida")
+        try:
+            path = object_path(stored.object_key)
+        except ValueError as error:
+            raise ApiError(400, "BAD_REQUEST", "object_key inválido") from error
+        if path.exists():
+            return send_file(
+                str(path),
+                mimetype=stored.mime_type,
+                download_name=stored.file_name,
+            )
         return jsonify(
             {
                 "objectKey": stored.object_key,

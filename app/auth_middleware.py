@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from .database import SessionLocal
 from .models import UserRole
-from .route_policy import PUBLIC_ROUTES, ROLE_POLICY
+from .route_policy import ROLE_POLICY, is_public_route
 from .security import AuthenticationError, user_from_token
 
 
@@ -36,7 +36,9 @@ def register_auth_middleware(app):
         g.request_id = request.headers.get("X-Request-Id", str(uuid4()))
         method = request.method.upper()
         path = request.path
-        if method == "OPTIONS" or (method, path) in PUBLIC_ROUTES or path == "/health":
+        if method == "OPTIONS":
+            return ("", 204)
+        if is_public_route(method, path):
             return None
         if not path.startswith("/api"):
             return None

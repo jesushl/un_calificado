@@ -12,6 +12,31 @@ PUBLIC_ROUTES = {
     ("POST", "/api/auth/login"),
 }
 
+PUBLIC_PREFIXES = (
+    ("GET", "/api/v1/explore"),
+    ("GET", "/api/explore"),
+    ("GET", "/api/v1/auth/oauth"),
+    ("GET", "/api/auth/oauth"),
+    ("POST", "/api/v1/auth/oauth"),
+    ("POST", "/api/auth/oauth"),
+)
+
+
+def is_public_route(method: str, path: str) -> bool:
+    if (method, path) in PUBLIC_ROUTES:
+        return True
+    if path == "/health":
+        return True
+    if method == "GET" and (
+        (path.startswith("/api/v1/files/") or path.startswith("/api/files/"))
+        and path.endswith("/content")
+    ):
+        return True
+    for prefix_method, prefix in PUBLIC_PREFIXES:
+        if method == prefix_method and path.startswith(prefix):
+            return True
+    return False
+
 _BASE_POLICY = {
     "GET /auth/me": ALL_ROLES,
     "POST /auth/consents": ALL_ROLES,
@@ -58,6 +83,7 @@ _BASE_POLICY = {
     "POST /privacy/requests/{folio}/fulfillment": {UserRole.ADMINISTRADOR},
     "GET /admin/availability-reports": {UserRole.ADMINISTRADOR},
     "GET /files/{fileId}/content": ALL_ROLES,
+    "POST /explore/providers/{providerId}": {UserRole.CLIENTE},
 }
 
 

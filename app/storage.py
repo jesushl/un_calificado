@@ -1,9 +1,32 @@
 import hashlib
 import hmac
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import urlencode
 
 from .config import get_settings
+
+
+def object_root() -> Path:
+    root = Path(get_settings().object_store_path)
+    if not root.is_absolute():
+        root = Path(__file__).resolve().parent.parent / root
+    root.mkdir(parents=True, exist_ok=True)
+    return root.resolve()
+
+
+def object_path(object_key: str) -> Path:
+    safe = Path(object_key)
+    if safe.is_absolute() or ".." in safe.parts:
+        raise ValueError("object_key inválido")
+    return object_root() / safe
+
+
+def put_object(object_key: str, data: bytes) -> Path:
+    path = object_path(object_key)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return path
 
 
 def signed_download(object_key: str, file_id: str, ttl_seconds: int = 900) -> dict:

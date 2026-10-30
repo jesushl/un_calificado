@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 from .auth import router as auth_router
 from .auth_middleware import register_auth_middleware
@@ -6,6 +6,7 @@ from .config import get_settings
 from .contracting import appointments, changes, proposals
 from .database import Base, engine
 from .errors import register_error_handlers
+from .explore import router as explore_router
 from .privacy import admin, files, privacy
 from .projects import router as projects_router
 from .providers import router as providers_router
@@ -39,6 +40,7 @@ def create_app() -> Flask:
         (privacy, "/privacy"),
         (admin, "/admin"),
         (files, "/files"),
+        (explore_router, "/explore"),
     )
     for blueprint, suffix in blueprints:
         for prefix, name_suffix in prefixes:
@@ -51,6 +53,24 @@ def create_app() -> Flask:
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"})
+
+    @app.after_request
+    def add_cors(response):
+        origin = request.headers.get("Origin", "")
+        allowed = {
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:4173",
+            "http://127.0.0.1:4173",
+            get_settings().frontend_origin,
+        }
+        if origin in allowed:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+            response.headers["Access-Control-Allow-Methods"] = (
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            )
+        return response
 
     return app
 

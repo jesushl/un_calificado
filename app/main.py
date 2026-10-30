@@ -2,42 +2,55 @@ from flask import Flask, jsonify
 
 from .auth import router as auth_router
 from .auth_middleware import register_auth_middleware
+from .config import get_settings
+from .contracting import appointments, changes, proposals
 from .database import Base, engine
-from .models import User
-from .security import get_current_user
+from .errors import register_error_handlers
+from .privacy import admin, files, privacy
+from .projects import router as projects_router
+from .providers import router as providers_router
+from .users import router as users_router
+
+
+def _init_schema() -> None:
+    if get_settings().database_url.startswith("sqlite"):
+        Base.metadata.create_all(bind=engine)
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
     app.config["API_TITLE"] = "UnCalificado API"
-    app.config["API_VERSION"] = "0.1.0"
+    app.config["API_VERSION"] = "1.0.0"
 
-    Base.metadata.create_all(bind=engine)
+    _init_schema()
+    register_error_handlers(app)
     register_auth_middleware(app)
-    app.register_blueprint(auth_router, url_prefix="/api/v1/auth")
-    app.register_blueprint(
-        auth_router, name="auth_compat", url_prefix="/api/auth"
+
+    prefixes = (("/api/v1", ""), ("/api", "_compat"))
+    blueprints = (
+        (auth_router, "/auth"),
+        (users_router, "/users"),
+        (providers_router, "/providers"),
+        (projects_router, "/requests"),
+        (appointments, "/appointments"),
+        (proposals, "/proposals"),
+        (changes, "/changes"),
+        (privacy, "/privacy"),
+        (admin, "/admin"),
+        (files, "/files"),
     )
+    for blueprint, suffix in blueprints:
+        for prefix, name_suffix in prefixes:
+            app.register_blueprint(
+                blueprint,
+                name=f"{blueprint.name}{name_suffix}",
+                url_prefix=f"{prefix}{suffix}",
+            )
 
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"})
-
-    @app.get("/api/v1/users/me")
-    @app.get("/api/users/me")
-    def current_user_compatibility():
-        user = get_current_user()
-        return jsonify(
-            {
-                "id": str(user.id),
-                "email": user.email,
-                "role": user.role.value,
-                "status": user.status.value,
-                "privacy_consent_version": user.privacy_consent_version,
-                "created_at": user.created_at.isoformat(),
-            }
-        )
 
     return app
 

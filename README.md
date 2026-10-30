@@ -33,6 +33,18 @@ docker compose --profile seed run --rm seed
 
 La API queda en `http://localhost:8000`. PostgreSQL en `5432`.
 
+## Cliente web
+
+En `web/` hay la versión React (rama `frontend`). Con la API arriba:
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+El cliente queda en `http://localhost:5173`. Guía visual en `web/design/styleguide.html`. Pruebas: `npm test` (unitarias) y `pytest web/e2e` (Selenium).
+
 Cuentas demo (`DemoPass123!`):
 
 - `demo.cliente@example.com`

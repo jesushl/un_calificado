@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { dataRole, safeNextPath, tradeLabel, zoneClass } from "./catalog"
+import {
+  clampDistanceKm,
+  dataRole,
+  safeNextPath,
+  tradeLabel,
+  userDiscovery,
+  zoneClass,
+} from "./catalog"
 
 describe("catálogo visual", () => {
   it("mapea roles de API a data-role", () => {
@@ -18,6 +25,16 @@ describe("catálogo visual", () => {
   it("nombra oficios en español", () => {
     expect(tradeLabel("herreria")).toBe("Herrería")
     expect(tradeLabel("plomeria")).toBe("Plomería")
+  })
+
+  it("lee la zona de descubrimiento de la cuenta", () => {
+    expect(userDiscovery({ searchZone: "Coyoacán", maxDistanceKm: 8 })).toEqual({
+      zone: "Coyoacán",
+      maxDistanceKm: 8,
+    })
+    expect(userDiscovery({ search_zone: "Iztapalapa", max_distance_km: 1 }).maxDistanceKm).toBe(2)
+    expect(clampDistanceKm(80)).toBe(50)
+    expect(userDiscovery(null).zone).toBeNull()
   })
 
   it("solo acepta rutas internas después de entrar", () => {

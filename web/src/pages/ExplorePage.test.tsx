@@ -7,6 +7,7 @@ import { ExplorePage } from "./ExplorePage"
 
 const popularProviders = vi.fn()
 const publicWorks = vi.fn()
+const discoveryZones = vi.fn()
 
 vi.mock("../api/client", async () => {
   const actual = await vi.importActual<typeof import("../api/client")>("../api/client")
@@ -16,6 +17,7 @@ vi.mock("../api/client", async () => {
       ...actual.api,
       popularProviders: (...args: unknown[]) => popularProviders(...args),
       publicWorks: (...args: unknown[]) => publicWorks(...args),
+      discoveryZones: (...args: unknown[]) => discoveryZones(...args),
       me: vi.fn(),
     },
     getToken: () => null,
@@ -24,6 +26,13 @@ vi.mock("../api/client", async () => {
 
 describe("ExplorePage", () => {
   beforeEach(() => {
+    sessionStorage.clear()
+    discoveryZones.mockResolvedValue({
+      items: [
+        { id: "Coyoacán", label: "Coyoacán" },
+        { id: "Iztapalapa", label: "Iztapalapa" },
+      ],
+    })
     popularProviders.mockResolvedValue({
       items: [
         {
@@ -84,6 +93,19 @@ describe("ExplorePage", () => {
       "href",
       "/entrar?siguiente=%2Fcalificados%2Fprov-1",
     )
-    expect(screen.queryByText(/calle/i)).not.toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/Calle\s+\d+/)
+    expect(screen.getByRole("heading", { name: /Elige alcaldía y distancia/i })).toBeInTheDocument()
+  })
+
+  it("pide zona de descubrimiento al invitado", async () => {
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ExplorePage />
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole("button", { name: "Coyoacán" })).toBeInTheDocument()
+    expect(screen.getByRole("slider", { name: /Distancia máxima/i })).toHaveValue("15")
   })
 })

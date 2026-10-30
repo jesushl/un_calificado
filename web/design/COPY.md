@@ -51,6 +51,28 @@ Español de México · pesos MXN · **hora del centro** · de **tú**. Voz: un m
 | Zona en foto | Zona aproximada: {colonia} |
 | Pie | Tu domicilio exacto nunca se publica. |
 
+## 2c. Zona de descubrimiento (cuenta)
+
+| Elemento | Copy |
+|---|---|
+| Nav | Cuenta |
+| Título | A quién ves cerca |
+| Apoyo | El índice solo muestra calificados dentro de esta distancia. Puedes cambiarla cuando quieras. Tu calle y número se quedan contigo. |
+| Radar con zona | Hasta {n} km de {alcaldía} |
+| Radar vacío | Elige alcaldía y distancia |
+| Explicación | Así te mostramos calificados cerca, como en una app de citas: tú fijas el punto y hasta dónde te mueves. Usamos la alcaldía, no tu calle. |
+| Campo alcaldía | ¿En qué alcaldía te mueves? · ayuda: El domicilio exacto nunca se publica. |
+| Campo distancia | Distancia máxima · ayuda: {n} km desde el centro de la alcaldía |
+| Botón | Guardar zona |
+| Cargando | Guardando cambios… |
+| Éxito | Cambios guardados. |
+| Enlace al índice | Ver calificados de tu zona |
+| Índice con zona | Hasta {n} km de {alcaldía}. Cambiar zona |
+| Índice sin zona (sesión) | Elige tu alcaldía y distancia para ver calificados cerca. Definir mi zona |
+| Vista previa invitado | Vista previa a {n} km de {alcaldía}. Guárdala en tu cuenta |
+| Error sin alcaldía | Elige una alcaldía para ver calificados cerca. |
+| Vacío con radio | No hay calificados a menos de {n} km de {alcaldía}. |
+
 ## 3. Entrar (login)
 
 | Elemento | Copy |

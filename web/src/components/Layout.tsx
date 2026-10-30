@@ -9,14 +9,17 @@ const LINKS = {
     { to: "/", label: "Índice" },
     { to: "/proyectos", label: "Proyectos" },
     { to: "/nuevo", label: "Crear proyecto" },
+    { to: "/cuenta", label: "Cuenta" },
   ],
   PROVEEDOR: [
     { to: "/", label: "Índice" },
     { to: "/proyectos", label: "Solicitudes" },
+    { to: "/cuenta", label: "Cuenta" },
   ],
   ADMINISTRADOR: [
     { to: "/", label: "Índice" },
     { to: "/proyectos", label: "Operación" },
+    { to: "/cuenta", label: "Cuenta" },
   ],
 }
 

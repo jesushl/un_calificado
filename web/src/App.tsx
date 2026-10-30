@@ -11,6 +11,7 @@ import { OAuthCallbackPage } from "./pages/OAuthCallbackPage"
 import { ProviderPage } from "./pages/ProviderPage"
 import { RegisterPage } from "./pages/RegisterPage"
 import { RequestPage } from "./pages/RequestPage"
+import { SettingsPage } from "./pages/SettingsPage"
 
 function Guard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
@@ -35,6 +36,14 @@ export default function App() {
               element={
                 <Guard>
                   <HomePage />
+                </Guard>
+              }
+            />
+            <Route
+              path="/cuenta"
+              element={
+                <Guard>
+                  <SettingsPage />
                 </Guard>
               }
             />

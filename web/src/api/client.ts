@@ -54,6 +54,18 @@ export type User = {
   phone?: string | null
   privacy_consent_version?: string
   created_at?: string
+  searchZone?: string | null
+  search_zone?: string | null
+  maxDistanceKm?: number
+  max_distance_km?: number
+}
+
+export type DiscoveryZone = { id: string; label: string }
+
+export type Discovery = {
+  applied: boolean
+  searchZone?: string | null
+  maxDistanceKm?: number
 }
 
 export type AuthResponse = {
@@ -88,6 +100,7 @@ export type ExploreProvider = {
   rating: { average: number; count: number }
   concludedCount: number
   coverImage: { id: string; downloadUrl: string; fileName: string } | null
+  distanceKm?: number
 }
 
 export type ExploreWork = {
@@ -131,6 +144,20 @@ export const api = {
   },
   me() {
     return request<User>("/api/v1/users/me")
+  },
+  updateMe(payload: {
+    name?: string
+    phone?: string
+    searchZone?: string
+    maxDistanceKm?: number
+  }) {
+    return request<User>("/api/v1/users/me", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    })
+  },
+  discoveryZones() {
+    return request<{ items: DiscoveryZone[] }>("/api/v1/explore/zones")
   },
   listRequests(estado?: string) {
     const query = estado ? `?estado=${encodeURIComponent(estado)}` : ""
@@ -181,16 +208,26 @@ export const api = {
       availabilityPercent: number
     }>(`/api/v1/admin/availability-reports?month=${month}`)
   },
-  popularProviders(oficio?: string) {
-    const query = oficio ? `?oficio=${encodeURIComponent(oficio)}` : ""
-    return request<{ items: ExploreProvider[] }>(`/api/v1/explore/providers${query}`)
+  popularProviders(oficio?: string, zona?: string, radioKm?: number) {
+    const params = new URLSearchParams()
+    if (oficio) params.set("oficio", oficio)
+    if (zona) params.set("zona", zona)
+    if (radioKm) params.set("radioKm", String(radioKm))
+    const query = params.toString() ? `?${params}` : ""
+    return request<{ items: ExploreProvider[]; discovery?: Discovery; noResultsMessage?: string | null }>(
+      `/api/v1/explore/providers${query}`,
+    )
   },
   publicProvider(id: string) {
     return request<ExploreProvider>(`/api/v1/explore/providers/${id}`)
   },
-  publicWorks(oficio?: string) {
-    const query = oficio ? `?oficio=${encodeURIComponent(oficio)}` : ""
-    return request<{ items: ExploreWork[] }>(`/api/v1/explore/works${query}`)
+  publicWorks(oficio?: string, zona?: string, radioKm?: number) {
+    const params = new URLSearchParams()
+    if (oficio) params.set("oficio", oficio)
+    if (zona) params.set("zona", zona)
+    if (radioKm) params.set("radioKm", String(radioKm))
+    const query = params.toString() ? `?${params}` : ""
+    return request<{ items: ExploreWork[]; discovery?: Discovery }>(`/api/v1/explore/works${query}`)
   },
   contactProvider(
     providerId: string,

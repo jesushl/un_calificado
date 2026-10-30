@@ -9,7 +9,7 @@ import {
 } from "react"
 
 import { api, ApiError, getToken, setToken, type User } from "../api/client"
-import { dataRole } from "../catalog"
+import { dataRole, readGuestDiscovery, userDiscovery } from "../catalog"
 
 type AuthState = {
   user: User | null
@@ -22,6 +22,11 @@ type AuthState = {
     role: "CLIENTE" | "PROVEEDOR"
   }) => Promise<void>
   acceptSession: (token: string, user: User) => void
+  updateProfile: (payload: {
+    name?: string
+    searchZone?: string
+    maxDistanceKm?: number
+  }) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -49,12 +54,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.role = dataRole(user?.role)
   }, [user])
 
+  const adoptGuestDiscovery = useCallback(async (nextUser: User) => {
+    if (userDiscovery(nextUser).zone) {
+      setUser(nextUser)
+      return
+    }
+    const guest = readGuestDiscovery()
+    if (!guest.zone) {
+      setUser(nextUser)
+      return
+    }
+    try {
+      const saved = await api.updateMe({
+        searchZone: guest.zone,
+        maxDistanceKm: guest.maxDistanceKm,
+      })
+      setUser(saved)
+    } catch {
+      setUser(nextUser)
+    }
+  }, [])
+
   const login = useCallback(async (email: string, password: string) => {
     setError(null)
     try {
       const response = await api.login(email, password)
       setToken(response.access_token)
-      setUser(response.user)
+      await adoptGuestDiscovery(response.user)
     } catch (caught) {
       setToken(null)
       const message =
@@ -66,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(message)
       throw caught
     }
-  }, [])
+  }, [adoptGuestDiscovery])
 
   const register = useCallback(
     async (payload: { email: string; password: string; role: "CLIENTE" | "PROVEEDOR" }) => {
@@ -78,14 +104,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       await login(payload.email, payload.password)
     },
-    [login],
+    [adoptGuestDiscovery, login],
   )
 
-  const acceptSession = useCallback((token: string, nextUser: User) => {
-    setToken(token)
-    setUser(nextUser)
-    setError(null)
-  }, [])
+  const acceptSession = useCallback(
+    (token: string, nextUser: User) => {
+      setToken(token)
+      setError(null)
+      void adoptGuestDiscovery(nextUser)
+    },
+    [adoptGuestDiscovery],
+  )
+
+  const updateProfile = useCallback(
+    async (payload: { name?: string; searchZone?: string; maxDistanceKm?: number }) => {
+      const next = await api.updateMe(payload)
+      setUser(next)
+    },
+    [],
+  )
 
   const logout = useCallback(async () => {
     try {
@@ -98,8 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, error, login, register, acceptSession, logout }),
-    [user, loading, error, login, register, acceptSession, logout],
+    () => ({ user, loading, error, login, register, acceptSession, updateProfile, logout }),
+    [user, loading, error, login, register, acceptSession, updateProfile, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

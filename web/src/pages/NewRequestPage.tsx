@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react"
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom"
 
 import { api, ApiError } from "../api/client"
-import { TRADES } from "../catalog"
+import { TRADES, userDiscovery } from "../catalog"
 import { useAuth } from "../auth/AuthContext"
 
 export function NewRequestPage() {
@@ -12,7 +12,7 @@ export function NewRequestPage() {
   const preferredProvider = params.get("proveedor")
   const [outcome, setOutcome] = useState("")
   const [trade, setTrade] = useState(params.get("oficio") || "albanileria")
-  const [zone, setZone] = useState("")
+  const [zone, setZone] = useState(userDiscovery(user).zone ?? "")
   const [date, setDate] = useState("")
   const [description, setDescription] = useState("")
   const [error, setError] = useState<string | null>(null)

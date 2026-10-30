@@ -8,7 +8,7 @@ El contrato que gobierna este código está en `contracts/openapi.yaml`. El trab
 
 ## Qué hay hoy
 
-Flask, PostgreSQL, JWT, bcrypt y el módulo de autenticación. El resto del contrato todavía no tiene handlers.
+Flask, PostgreSQL, Alembic, JWT, bcrypt y los handlers del contrato: autenticación, proveedores, solicitudes, contratación, evaluaciones y privacidad. El binario de archivos no vive en la API; se entrega con URL temporal.
 
 ## Arranque local
 
@@ -19,7 +19,7 @@ Flask, PostgreSQL, JWT, bcrypt y el módulo de autenticación. El resto del cont
 docker compose up -d db
 ```
 
-3. Construye e inicia la API:
+3. Construye e inicia la API (el contenedor aplica `alembic upgrade head`):
 
 ```bash
 docker compose up -d --build api

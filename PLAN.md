@@ -10,13 +10,18 @@ Este archivo es la lista de trabajo del desarrollo formal. El repositorio del cu
 
 Cerrado y usable:
 
-- Flask, Gunicorn, Docker Compose y PostgreSQL 16.
-- Registro, login, `/auth/me`, `/users/me` y ping de administrador.
-- JWT con `iat`/`exp`, bcrypt, RBAC deny-by-default.
-- Modelos relacionales y datos demo.
-- Pruebas del módulo de autenticación.
+- Flask, Gunicorn, Docker Compose, Alembic y PostgreSQL 16.
+- Registro, login, consentimientos, logout con `jti`, `/users/me` y ping de administrador.
+- JWT con `iat`/`exp`/`jti`, secreto previo opcional, bcrypt y RBAC deny-by-default.
+- Handlers de proveedores, solicitudes, contratación, evaluaciones, privacidad ARCO y reporte de disponibilidad.
+- Modelos relacionales, URLs temporales de archivos y datos demo aislados a development/test.
+- Pruebas de autenticación, plataforma, proveedores, solicitudes, contratación y privacidad.
 
-Aún no hay handlers de negocio. Las rutas del contrato distintas de auth/health quedan bloqueadas por la política de acceso.
+Pendiente operativo, no de contrato:
+
+- Gestor de secretos real y pruebas de carga RNF-08.
+- Proxy/pool de PostgreSQL para Lambda.
+- Quitar cuentas demo antes de un entorno compartido.
 
 ## Principios que no se negocian
 
@@ -28,49 +33,40 @@ Aún no hay handlers de negocio. Las rutas del contrato distintas de auth/health
 
 ## Fase 1 — Plataforma mínima para crecer
 
-- Introducir Alembic y dejar de usar `create_all` como esquema de desarrollo.
-- Completar la matriz RBAC para todas las rutas del contrato (`/api/v1` y alias `/api`).
-- Añadir `POST /auth/consents` y `POST /auth/logout`.
-- Añadir `PATCH /users/me`.
-- Rate limiting en registro y login; conservar `409` solo mientras el contrato lo exija.
-- Quitar o aislar cuentas demo antes de cualquier entorno compartido.
+Hecho, salvo el retiro de cuentas demo en un entorno compartido:
+
+- Alembic versiona el esquema; `create_all` queda solo para SQLite/pruebas.
+- Matriz RBAC completa para `/api/v1` y alias `/api`.
+- `POST /auth/consents`, `POST /auth/logout` y `PATCH /users/me`.
+- Rate limiting en registro y login; `409` se conserva por contrato.
+- Seed demo bloqueado fuera de `development`/`test`.
 
 ## Fase 2 — Proveedores
 
-- `GET/POST /providers`
-- `GET/PUT /providers/{providerId}`
-- Portafolio: metadata en PostgreSQL y binario en object storage con URL temporal.
-- Verificaciones: envío por proveedor y revisión por administrador.
+Hecho: alta/consulta/reemplazo de perfil, portafolio con URL temporal, envío y revisión de verificaciones.
 
 ## Fase 3 — Solicitudes
 
-- `GET/POST /requests` y `GET/PATCH /requests/{requestId}`
-- Adjuntos y representaciones visuales.
-- Búsqueda, selección de proveedor y decisión del proveedor.
-- Transiciones de estado y solicitudes de soporte.
-- Domicilio visible solo cuando RF-52 lo autorice.
+Hecho: alta/consulta/edición, adjuntos, representación visual, búsqueda, selección, decisión del proveedor, soporte, transiciones y RF-52.
 
 ## Fase 4 — Contratación
 
-- Citas: alta, consulta, actualización y cancelación.
-- Propuestas y decisión del cliente.
-- Cambios de presupuesto, decisión y análisis informativo de IA.
-- Mensajes sin teléfonos y bitácora append-only.
+Hecho: citas con doble confirmación, propuestas, cambios, análisis informativo de IA, mensajes sin teléfonos y bitácora append-only.
 
 ## Fase 5 — Cierre, privacidad y operación
 
-- Evaluaciones al concluir un proyecto.
-- Solicitudes ARCO y su cumplimiento.
-- Reporte mensual de disponibilidad para administrador.
-- Secretos en un gestor, rotación JWT y revocación por `jti` si hay logout real.
+Hecho en API: evaluaciones, ARCO y reporte mensual. Logout revoca `jti`; el secreto previo permite rotación simple.
+
+Sigue fuera de este repo:
+
+- Secretos en un gestor dedicado.
 - Proxy/pool de PostgreSQL para Lambda.
 - Pruebas de carga RNF-08.
 
-## Orden recomendado para el siguiente commit de código
+## Siguiente trabajo operativo
 
-1. Alembic y esquema versionado.
-2. Consentimientos, logout y `PATCH /users/me`.
-3. Módulo de proveedores.
-4. Módulo de solicitudes.
+1. Quitar o rotar cuentas demo antes de un entorno compartido.
+2. Conectar object storage real y un gestor de secretos.
+3. Pruebas de carga RNF-08 y pool de PostgreSQL para Lambda.
 
 No implementar microservicios ni colas en esta etapa. Cada capacidad puede empaquetarse después como una Lambda que reutilice el mismo dominio y la misma base.

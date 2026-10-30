@@ -346,6 +346,18 @@ class StatusPatch(BaseModel):
     reason: str | None = None
 
 
+class ContactRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    expected_outcome: str = Field(alias="expectedOutcome", min_length=1)
+    approximate_zone: str = Field(alias="approximateZone", min_length=1)
+    trade: str | None = None
+
+
+class OAuthExchange(BaseModel):
+    code: str = Field(min_length=8, max_length=128)
+
+
 class PageQuery(BaseModel):
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100, alias="pageSize")

@@ -16,6 +16,7 @@ Cerrado y usable:
 - Handlers de proveedores, solicitudes, contratación, evaluaciones, privacidad ARCO y reporte de disponibilidad.
 - Modelos relacionales, URLs temporales de archivos y datos demo aislados a development/test.
 - Pruebas de autenticación, plataforma, proveedores, solicitudes, contratación y privacidad.
+- Radio de descubrimiento por alcaldía y distancia máxima en la cuenta (filtra índice y listados). El domicilio exacto no se usa como origen.
 
 Pendiente operativo, no de contrato:
 
@@ -68,5 +69,35 @@ Sigue fuera de este repo:
 1. Quitar o rotar cuentas demo antes de un entorno compartido.
 2. Conectar object storage real y un gestor de secretos.
 3. Pruebas de carga RNF-08 y pool de PostgreSQL para Lambda.
+
+## Siguiente trabajo de producto
+
+### Mapa y radio (reemplaza la alcaldía como origen)
+
+La distancia no se fija por alcaldía. El usuario ve un mapa con un círculo cuyo radio es el alcance de búsqueda. Puede arrastrar el centro del círculo; ese punto (aproximado, nunca un domicilio publicado) y el radio son la configuración de descubrimiento.
+
+RF-52 se mantiene: el mapa no muestra ni guarda calle y número como dato público.
+
+### Menú de cuenta
+
+La configuración de búsqueda y la de usuario viven siempre en un menú desplegable de opciones (no como un enlace suelto en la barra). Desde ahí se entra a zona, radio, perfil y cierre de sesión.
+
+### Ficha del calificado
+
+- Si el perfil está etiquetado con oficios (p. ej. albañilería), no preguntar qué servicio busca quien contacta: se usa el oficio del calificado. Si tiene más de uno, se elige entre esos, no del catálogo completo.
+- Al pie de la ficha, perfiles similares en el área. Si hay pocos, se amplía el radio hasta completar una tira útil.
+
+### Analítica (submódulo)
+
+Base de interacciones de usuarios, no un dashboard de marketing. Registrar y consultar:
+
+- Número de visitas (índice, fichas, autenticación).
+- Origen de la visita: Facebook, Google, TikTok, directo, etc.
+- Perfiles de calificados más visitados.
+- Zonas con más usuarios (clientes).
+- Zonas con más calificados.
+- Oficios más populares (vistas, contactos, proyectos).
+
+El dato de zona sigue siendo aproximado. No persistir domicilio exacto ni identificadores de anuncio que no hayamos declarado en privacidad.
 
 No implementar microservicios ni colas en esta etapa. Cada capacidad puede empaquetarse después como una Lambda que reutilice el mismo dominio y la misma base.

@@ -45,6 +45,8 @@ class UserResponse(BaseModel):
     created_at: datetime
     name: str | None = None
     phone: str | None = None
+    search_zone: str | None = None
+    max_distance_km: int = 15
 
 
 class AuthResponse(BaseModel):
@@ -72,10 +74,17 @@ class UserUpdateRequest(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=160)
     phone: str | None = None
+    search_zone: str | None = Field(default=None, alias="searchZone", max_length=160)
+    max_distance_km: int | None = Field(default=None, alias="maxDistanceKm", ge=2, le=50)
 
     @model_validator(mode="after")
     def require_one_field(self):
-        if self.name is None and self.phone is None:
+        if (
+            self.name is None
+            and self.phone is None
+            and self.search_zone is None
+            and self.max_distance_km is None
+        ):
             raise ValueError("Se requiere al menos un campo")
         return self
 

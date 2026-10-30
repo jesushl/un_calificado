@@ -45,6 +45,8 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(String(40))
     privacy_consent_version: Mapped[str] = mapped_column(String(80))
     adult_declaration: Mapped[bool] = mapped_column(Boolean, default=True)
+    search_zone: Mapped[str | None] = mapped_column(String(160))
+    max_distance_km: Mapped[int] = mapped_column(Integer, default=15)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.utcnow
     )

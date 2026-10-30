@@ -169,6 +169,8 @@ paths:
         - {$ref: '#/components/parameters/Page'}
         - {$ref: '#/components/parameters/PageSize'}
         - {name: oficio, in: query, schema: {type: string}}
+        - {name: zona, in: query, schema: {type: string}, description: Alcaldía de descubrimiento; no es domicilio exacto}
+        - {name: radioKm, in: query, schema: {type: integer, minimum: 2, maximum: 50}}
       responses:
         '200': {description: Perfiles públicos sin domicilio exacto, content: {application/json: {schema: {$ref: '#/components/schemas/ExploreProviderPage'}}}}
         '500': {$ref: '#/components/responses/ServerError'}
@@ -213,8 +215,20 @@ paths:
         - {$ref: '#/components/parameters/Page'}
         - {$ref: '#/components/parameters/PageSize'}
         - {name: oficio, in: query, schema: {type: string}}
+        - {name: zona, in: query, schema: {type: string}}
+        - {name: radioKm, in: query, schema: {type: integer, minimum: 2, maximum: 50}}
       responses:
         '200': {description: Galería de obra sin domicilio exacto, content: {application/json: {schema: {$ref: '#/components/schemas/ExploreWorkPage'}}}}
+        '500': {$ref: '#/components/responses/ServerError'}
+  /explore/zones:
+    get:
+      tags: [explore]
+      security: []
+      summary: Alcaldías para el radio de descubrimiento
+      operationId: listDiscoveryZones
+      x-acceptance-criteria: [RF-52-AC-1, RNF-04-AC-2]
+      responses:
+        '200': {description: Zonas aproximadas, sin domicilio exacto, content: {application/json: {schema: {$ref: '#/components/schemas/DiscoveryZonePage'}}}}
         '500': {$ref: '#/components/responses/ServerError'}
   /users/me:
     get:
@@ -908,6 +922,8 @@ components:
         role: {type: string, enum: [CLIENTE, PROVEEDOR, ADMINISTRADOR]}
         createdAt: {$ref: '#/components/schemas/DateTime'}
         privacyConsentVersion: {type: string}
+        searchZone: {type: string, description: Alcaldía de descubrimiento. Nunca es un domicilio exacto}
+        maxDistanceKm: {type: integer, minimum: 2, maximum: 50}
     RegisterRequest:
       type: object
       required: [email, password, role, privacyConsentVersion, adultDeclaration]
@@ -951,6 +967,8 @@ components:
       properties:
         name: {type: string, minLength: 1, maxLength: 160}
         phone: {type: string}
+        searchZone: {type: string, description: Alcaldía de descubrimiento. Nunca es un domicilio exacto}
+        maxDistanceKm: {type: integer, minimum: 2, maximum: 50}
     ProviderUpsertRequest:
       type: object
       required: [name, modality, trades, experienceYears, coverage]
@@ -1310,12 +1328,34 @@ components:
         rating: {$ref: '#/components/schemas/RatingSummary'}
         concludedCount: {type: integer}
         coverImage: {$ref: '#/components/schemas/File'}
+        distanceKm: {type: number, description: Distancia aproximada entre alcaldías, no un domicilio}
     ExploreProviderPage:
       type: object
       required: [items, page]
       properties:
         items: {type: array, items: {$ref: '#/components/schemas/ExploreProvider'}}
         page: {$ref: '#/components/schemas/PageInfo'}
+        discovery: {$ref: '#/components/schemas/Discovery'}
+        noResultsMessage: {type: string, nullable: true}
+    Discovery:
+      type: object
+      required: [applied]
+      properties:
+        applied: {type: boolean}
+        searchZone: {type: string}
+        maxDistanceKm: {type: integer}
+    DiscoveryZonePage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [id, label]
+            properties:
+              id: {type: string}
+              label: {type: string}
     ExploreWork:
       type: object
       required: [id, fileName, contentType, downloadUrl, trade, expectedOutcome, approximateZone, provider]

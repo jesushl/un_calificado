@@ -33,9 +33,9 @@ Alcance actual del cliente web: índice público (zona + radio), ficha de califi
 
 Vista del entorno local (Docker Compose): cliente → Vite → Flask → PostgreSQL, con JWT/RBAC, OAuth opcional y object store.
 
-![Arquitectura local de UnCalificado](docs/architecture/uncalificado-architecture.svg)
+![Arquitectura local de UnCalificado](docs/architecture/uncalificado-architecture.png)
 
-Archivos: [`docs/architecture/uncalificado-architecture.svg`](docs/architecture/uncalificado-architecture.svg) · [versión interactiva (HTML)](docs/architecture/uncalificado-architecture.html)
+Archivos en el repo (visibles al clonar o en GitHub): [`PNG`](docs/architecture/uncalificado-architecture.png) · [`SVG`](docs/architecture/uncalificado-architecture.svg) · [HTML interactivo](docs/architecture/uncalificado-architecture.html)
 
 ### Descripción
 

@@ -197,6 +197,8 @@ def patch_request(request_id: str):
             item.summary_confirmed = True
             item.status = ProjectStatus.CONFIRMADA
             item.confirmed_at = utcnow()
+            if item.selected_provider_id and item.decision_expires_at is None:
+                item.decision_expires_at = utcnow().replace(hour=23, minute=59)
             append_audit(db, item, user.id, "SOLICITUD_CONFIRMADA")
         db.commit()
         db.refresh(item)

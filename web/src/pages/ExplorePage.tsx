@@ -16,12 +16,14 @@ import {
 } from "../catalog"
 import { ContactCta } from "../components/ContactCta"
 import { DiscoveryControls } from "../components/DiscoveryControls"
+import { LocalSearch } from "../components/LocalSearch"
 
 export function ExplorePage() {
   const { user } = useAuth()
   const account = userDiscovery(user)
   const [params, setParams] = useSearchParams()
   const oficio = params.get("oficio") || ""
+  const query = params.get("q") || ""
   const guest = readGuestDiscovery()
   const previewZone = params.get("zona") || guest.zone
   const previewKm = params.get("radioKm")
@@ -50,8 +52,8 @@ export function ExplorePage() {
     const zona = user ? undefined : previewZone || undefined
     const radio = user ? undefined : previewZone ? previewKm : undefined
     Promise.all([
-      api.popularProviders(oficio || undefined, zona, radio),
-      api.publicWorks(oficio || undefined, zona, radio),
+      api.popularProviders(oficio || undefined, zona, radio, query || undefined),
+      api.publicWorks(oficio || undefined, zona, radio, query || undefined),
     ])
       .then(([popular, gallery]) => {
         setProviders(popular.items)
@@ -60,12 +62,19 @@ export function ExplorePage() {
       })
       .catch((caught: Error) => setError(caught.message))
       .finally(() => setLoading(false))
-  }, [oficio, previewZone, previewKm, user, account.zone, account.maxDistanceKm])
+  }, [oficio, query, previewZone, previewKm, user, account.zone, account.maxDistanceKm])
 
   function selectTrade(id: string) {
     const next = new URLSearchParams(params)
     if (!id || id === oficio) next.delete("oficio")
     else next.set("oficio", id)
+    setParams(next, { replace: true })
+  }
+
+  function setQuery(nextQuery: string) {
+    const next = new URLSearchParams(params)
+    if (nextQuery) next.set("q", nextQuery)
+    else next.delete("q")
     setParams(next, { replace: true })
   }
 
@@ -120,6 +129,16 @@ export function ExplorePage() {
         </p>
       ) : null}
 
+      <LocalSearch value={query} onSearch={setQuery} />
+      {query ? (
+        <p className="discovery-bar" data-testid="search-active">
+          Buscando “{query}”.{" "}
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setQuery("")}>
+            Quitar búsqueda
+          </button>
+        </p>
+      ) : null}
+
       <div className="cluster" role="group" aria-label="Filtrar por oficio">
         {TRADES.map((trade) => (
           <button
@@ -158,7 +177,10 @@ export function ExplorePage() {
           <ul className="obra-muro">
             {works.map((work) => (
               <li key={work.id}>
-                <Link className="obra-foto" to={`/calificados/${work.provider.id}`}>
+                <Link
+                  className="obra-foto"
+                  to={`/calificados/${work.provider.id}?oficio=${encodeURIComponent(work.trade)}`}
+                >
                   <img
                     src={work.downloadUrl}
                     alt={`${work.expectedOutcome}. Zona aproximada: ${work.approximateZone}.`}

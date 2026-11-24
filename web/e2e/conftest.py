@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 
 import pytest
 from selenium import webdriver
@@ -6,6 +8,9 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options
 
 BASE_URL = os.environ.get("UX_BASE_URL", "http://127.0.0.1:5173")
+
+# Permite `from helpers import …` al correr pytest desde la raíz del repo.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 @pytest.fixture(scope="session")

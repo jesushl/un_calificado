@@ -20,20 +20,23 @@ export function LoginPage() {
 
   if (user) return <Navigate to={next} replace />
 
-  async function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!email.trim()) {
+    const data = new FormData(event.currentTarget)
+    const nextEmail = String(data.get("email") || email).trim()
+    const nextPassword = String(data.get("password") || password)
+    if (!nextEmail) {
       setFieldError("Escribe tu correo electrónico.")
       return
     }
-    if (!password) {
+    if (!nextPassword) {
       setFieldError("Escribe tu contraseña.")
       return
     }
     setFieldError(null)
     setPending(true)
     try {
-      await login(email.trim(), password)
+      await login(nextEmail, nextPassword)
     } catch {
       /* el mensaje vive en AuthContext */
     } finally {

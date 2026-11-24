@@ -17,6 +17,7 @@ def test_index_shows_popular_providers_and_work_photos(browser, base_url):
     contact = browser.find_element(By.LINK_TEXT, "Entra para contactar")
     contact.click()
     wait.until(EC.url_contains("/entrar"))
+    wait.until(EC.presence_of_element_located((By.NAME, "email")))
     assert browser.find_element(By.NAME, "email")
     assert browser.find_element(By.CSS_SELECTOR, "[data-network='google']")
     assert browser.find_element(By.CSS_SELECTOR, "[data-network='facebook']")

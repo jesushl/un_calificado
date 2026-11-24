@@ -207,3 +207,23 @@ def test_signed_work_photo_is_public():
     assert photo.status_code == 200
     assert photo.mimetype == "image/svg+xml"
     assert b"<svg" in photo.data
+
+
+def test_local_search_filters_providers_and_works_by_text():
+    _gallery_provider()
+    with app.test_client() as client:
+        by_name = client.get("/api/v1/explore/providers?q=Palma")
+        by_trade = client.get("/api/v1/explore/providers?q=herrero")
+        by_work = client.get("/api/v1/explore/works?q=reja")
+        miss = client.get("/api/v1/explore/providers?q=plomeria+azotea")
+
+    assert by_name.status_code == 200
+    assert any(item["name"] == "Herrería La Palma" for item in by_name.get_json()["items"])
+    assert by_name.get_json()["query"] == "Palma"
+    assert by_trade.status_code == 200
+    assert any(item["name"] == "Herrería La Palma" for item in by_trade.get_json()["items"])
+    assert by_work.status_code == 200
+    assert any("reja" in item["expectedOutcome"].lower() for item in by_work.get_json()["items"])
+    assert miss.status_code == 200
+    assert miss.get_json()["items"] == []
+    assert "Nada coincide" in (miss.get_json()["noResultsMessage"] or "")

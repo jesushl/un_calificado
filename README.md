@@ -185,11 +185,13 @@ cd web
 npm test
 ```
 
-Pruebas E2E (Selenium; ver [`web/e2e/`](web/e2e/)):
+Pruebas E2E (Selenium; ver [`web/e2e/`](web/e2e/) y [`web/e2e/README.md`](web/e2e/README.md)). Requiere Compose arriba (`api` + `web`) y seed demo:
 
 ```bash
+docker compose up -d
+docker compose --profile seed run --rm seed
 pip install -r web/e2e/requirements.txt
-pytest web/e2e
+UX_BASE_URL=http://127.0.0.1:5173 pytest web/e2e
 ```
 
 ---

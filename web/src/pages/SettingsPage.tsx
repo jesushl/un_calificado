@@ -3,7 +3,7 @@ import { Link, Navigate } from "react-router-dom"
 
 import { api, ApiError, type DiscoveryZone } from "../api/client"
 import { useAuth } from "../auth/AuthContext"
-import { DEFAULT_DISTANCE_KM, readGuestDiscovery, userDiscovery } from "../catalog"
+import { accountLabel, DEFAULT_DISTANCE_KM, readGuestDiscovery, userDiscovery } from "../catalog"
 import { DiscoveryControls } from "../components/DiscoveryControls"
 
 export function SettingsPage() {
@@ -65,6 +65,10 @@ export function SettingsPage() {
         <p className="eyebrow">Cuenta</p>
         <h1>A quién ves cerca</h1>
       </div>
+      <p data-testid="account-summary">
+        Sesión de <strong>{accountLabel(user)}</strong>
+        {user.email ? ` · ${user.email}` : ""}.
+      </p>
       <p>
         El índice solo muestra calificados dentro de esta distancia. Puedes cambiarla cuando
         quieras. Tu calle y número se quedan contigo.

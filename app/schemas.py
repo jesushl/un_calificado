@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
@@ -11,6 +12,18 @@ from .models import (
     UserRole,
     UserStatus,
 )
+
+_MX_TZ = ZoneInfo("America/Mexico_City")
+
+
+def _today_mexico() -> date:
+    return datetime.now(_MX_TZ).date()
+
+
+def _reject_past_desired_date(value: date | None) -> date | None:
+    if value is not None and value < _today_mexico():
+        raise ValueError("la fecha deseada debe ser hoy o una fecha futura")
+    return value
 
 
 class RegisterRequest(BaseModel):
@@ -137,6 +150,11 @@ class RequestCreate(BaseModel):
             raise ValueError("oficio vacío o del catálogo")
         return value
 
+    @field_validator("desired_date")
+    @classmethod
+    def validate_desired_date(cls, value: date | None) -> date | None:
+        return _reject_past_desired_date(value)
+
 
 class RequestPatch(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -147,6 +165,11 @@ class RequestPatch(BaseModel):
     summary_confirmed: bool | None = Field(default=None, alias="summaryConfirmed")
     desired_date: date | None = Field(default=None, alias="desiredDate")
     address: str | None = None
+
+    @field_validator("desired_date")
+    @classmethod
+    def validate_desired_date(cls, value: date | None) -> date | None:
+        return _reject_past_desired_date(value)
 
     @model_validator(mode="after")
     def require_one_field(self):
@@ -361,6 +384,13 @@ class ContactRequest(BaseModel):
     expected_outcome: str = Field(alias="expectedOutcome", min_length=1)
     approximate_zone: str = Field(alias="approximateZone", min_length=1)
     trade: str | None = None
+    desired_date: date | None = Field(default=None, alias="desiredDate")
+    description: str | None = None
+
+    @field_validator("desired_date")
+    @classmethod
+    def validate_desired_date(cls, value: date | None) -> date | None:
+        return _reject_past_desired_date(value)
 
 
 class OAuthExchange(BaseModel):

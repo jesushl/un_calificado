@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
 import { AuthProvider, useAuth } from "./auth/AuthContext"
 import { Layout } from "./components/Layout"
+import { AgendaPage } from "./pages/AgendaPage"
 import { ExplorePage } from "./pages/ExplorePage"
 import { HomePage } from "./pages/HomePage"
 import { LoginPage } from "./pages/LoginPage"
@@ -60,6 +61,14 @@ export default function App() {
               element={
                 <Guard>
                   <RequestPage />
+                </Guard>
+              }
+            />
+            <Route
+              path="/agenda"
+              element={
+                <Guard>
+                  <AgendaPage />
                 </Guard>
               }
             />

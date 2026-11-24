@@ -270,6 +270,7 @@ def serialize_appointment(appointment: Appointment) -> dict:
         "startsAt": appointment.starts_at.isoformat(),
         "endsAt": appointment.ends_at.isoformat(),
         "costMxn": float(appointment.cost_mxn),
+        "confirmedByClient": appointment.confirmed_by_client,
         "confirmedByProvider": appointment.confirmed_by_provider,
         "isVisit": appointment.is_visit,
         "status": appointment.status.value,

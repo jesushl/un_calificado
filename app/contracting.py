@@ -39,8 +39,10 @@ from .schemas import (
     CancelRequest,
     ChangeCreate,
     ChangeDecision,
+    PageQuery,
     ProposalCreate,
     ProposalDecision,
+    page_info,
 )
 from .security import get_current_user
 
@@ -53,6 +55,22 @@ def _require_appointment_access(user: User, appointment: Appointment, db: Sessio
     item = get_request_or_404(db, appointment.request_id)
     require_request_access(user, item, db)
     return item
+
+
+def _accessible_request_ids(db: Session, user: User) -> list:
+    if user.role == UserRole.ADMINISTRADOR:
+        return list(db.scalars(select(ServiceRequest.id)))
+    provider = provider_of(user, db) if user.role == UserRole.PROVEEDOR else None
+    if provider is not None:
+        return list(
+            db.scalars(
+                select(ServiceRequest.id).where(
+                    (ServiceRequest.owner_id == user.id)
+                    | (ServiceRequest.selected_provider_id == provider.id)
+                )
+            )
+        )
+    return list(db.scalars(select(ServiceRequest.id).where(ServiceRequest.owner_id == user.id)))
 
 
 def _has_overlap(db: Session, provider_id, starts_at, ends_at, ignore_id=None) -> bool:
@@ -78,6 +96,42 @@ def _refresh_confirmation(appointment: Appointment, item: ServiceRequest, db: Se
         if item.status in {ProjectStatus.CONFIRMADA, ProjectStatus.BORRADOR}:
             item.status = ProjectStatus.PROGRAMADO
         append_audit(db, item, actor_id, "CITA_CONFIRMADA")
+
+
+@appointments.get("")
+def list_appointments():
+    user = get_current_user()
+    pagination = PageQuery.model_validate(request.args.to_dict())
+    request_id = request.args.get("requestId")
+    db = SessionLocal()
+    try:
+        expire_pending_entities(db)
+        query = select(Appointment)
+        if request_id:
+            item = get_request_or_404(db, parse_uuid(request_id, "requestId"))
+            require_request_access(user, item, db)
+            query = query.where(Appointment.request_id == item.id)
+        else:
+            accessible = _accessible_request_ids(db, user)
+            if not accessible:
+                return jsonify(
+                    {
+                        "items": [],
+                        "page": page_info(pagination.page, pagination.page_size, 0),
+                    }
+                )
+            query = query.where(Appointment.request_id.in_(accessible))
+        rows = list(db.scalars(query.order_by(Appointment.starts_at.asc())))
+        start = (pagination.page - 1) * pagination.page_size
+        page_items = rows[start : start + pagination.page_size]
+        return jsonify(
+            {
+                "items": [serialize_appointment(row) for row in page_items],
+                "page": page_info(pagination.page, pagination.page_size, len(rows)),
+            }
+        )
+    finally:
+        db.close()
 
 
 @appointments.post("")
@@ -194,6 +248,37 @@ def cancel_appointment(appointment_id: str):
         db.commit()
         db.refresh(appointment)
         return jsonify(serialize_appointment(appointment))
+    finally:
+        db.close()
+
+
+@proposals.get("")
+def list_proposals():
+    user = get_current_user()
+    pagination = PageQuery.model_validate(request.args.to_dict())
+    request_id = request.args.get("requestId")
+    if not request_id:
+        raise ApiError(422, "VALIDATION_ERROR", "requestId es requerido")
+    db = SessionLocal()
+    try:
+        expire_pending_entities(db)
+        item = get_request_or_404(db, parse_uuid(request_id, "requestId"))
+        require_request_access(user, item, db)
+        rows = list(
+            db.scalars(
+                select(Proposal)
+                .where(Proposal.request_id == item.id)
+                .order_by(Proposal.version.desc())
+            )
+        )
+        start = (pagination.page - 1) * pagination.page_size
+        page_items = rows[start : start + pagination.page_size]
+        return jsonify(
+            {
+                "items": [serialize_proposal(row) for row in page_items],
+                "page": page_info(pagination.page, pagination.page_size, len(rows)),
+            }
+        )
     finally:
         db.close()
 

@@ -126,3 +126,88 @@ def test_appointment_proposal_change_and_evaluation_flow():
     assert closed.get_json()["status"] == "CONCLUIDO"
     assert evaluation.status_code == 201
     assert analysis.status_code == 201
+
+
+def test_list_appointments_and_proposals_by_request():
+    with app.test_client() as client:
+        client_token = token_for(client, "list.cli@example.com")
+        provider_token = token_for(client, "list.prov@example.com", "PROVEEDOR")
+        provider_id = client.post(
+            "/api/v1/providers",
+            headers=auth_header(provider_token),
+            json=PROFILE,
+        ).get_json()["id"]
+        request_id = client.post(
+            "/api/v1/requests",
+            headers=auth_header(client_token),
+            json={
+                "expectedOutcome": "Revisar humedad",
+                "trade": "albanileria",
+                "approximateZone": "Coyoacán",
+                "desiredDate": date.today().isoformat(),
+                "description": "Muro norte",
+            },
+        ).get_json()["id"]
+        client.patch(
+            f"/api/v1/requests/{request_id}",
+            headers=auth_header(client_token),
+            json={"summaryConfirmed": True},
+        )
+        client.put(
+            f"/api/v1/requests/{request_id}/selection",
+            headers=auth_header(client_token),
+            json={"providerId": provider_id},
+        )
+        client.post(
+            f"/api/v1/requests/{request_id}/provider-decision",
+            headers=auth_header(provider_token),
+            json={"decision": "ACEPTAR"},
+        )
+        starts = datetime.now(timezone.utc) + timedelta(days=3)
+        created = client.post(
+            "/api/v1/appointments",
+            headers=auth_header(provider_token),
+            json={
+                "requestId": request_id,
+                "startsAt": starts.isoformat(),
+                "endsAt": (starts + timedelta(hours=1)).isoformat(),
+                "costMxn": 200,
+                "confirmedByProvider": True,
+                "isVisit": True,
+            },
+        )
+        assert created.status_code == 201
+        proposal = client.post(
+            "/api/v1/proposals",
+            headers=auth_header(provider_token),
+            json={
+                "requestId": request_id,
+                "workDescription": "Sellado y pintura",
+                "laborSubtotalMxn": 800,
+                "materials": [],
+                "additionalCostsMxn": 0,
+                "totalMxn": 800,
+            },
+        )
+        assert proposal.status_code == 201
+
+        agenda = client.get("/api/v1/appointments", headers=auth_header(provider_token))
+        filtered = client.get(
+            f"/api/v1/appointments?requestId={request_id}",
+            headers=auth_header(client_token),
+        )
+        proposals = client.get(
+            f"/api/v1/proposals?requestId={request_id}",
+            headers=auth_header(client_token),
+        )
+        missing = client.get("/api/v1/proposals", headers=auth_header(client_token))
+
+    assert agenda.status_code == 200
+    assert any(item["requestId"] == request_id for item in agenda.get_json()["items"])
+    assert filtered.status_code == 200
+    assert len(filtered.get_json()["items"]) == 1
+    assert filtered.get_json()["items"][0]["confirmedByClient"] is False
+    assert proposals.status_code == 200
+    assert len(proposals.get_json()["items"]) == 1
+    assert proposals.get_json()["items"][0]["totalMxn"] == 800
+    assert missing.status_code == 422

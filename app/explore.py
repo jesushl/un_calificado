@@ -12,6 +12,7 @@ from .domain import (
     rating_summary,
     serialize_file,
     serialize_request,
+    utcnow,
 )
 from .errors import ApiError, validation_error
 from .geo import (
@@ -29,6 +30,7 @@ from .models import (
     StoredFile,
     UserRole,
 )
+from .local_search import provider_matches, work_matches
 from .schemas import ContactRequest, PageQuery, page_info
 from .security import get_current_user, optional_user
 
@@ -103,6 +105,7 @@ def list_zones():
 def list_popular_providers():
     pagination = PageQuery.model_validate(request.args.to_dict())
     oficio = request.args.get("oficio")
+    query = (request.args.get("q") or "").strip()
     origin, radius, applied = discovery_query()
     db = SessionLocal()
     try:
@@ -111,6 +114,8 @@ def list_popular_providers():
             if not is_complete_provider(provider):
                 continue
             if oficio and oficio not in {item.trade for item in provider.trades}:
+                continue
+            if query and not provider_matches(query, provider):
                 continue
             nearby, distance = within_radius(
                 origin, radius, [item.zone for item in provider.coverage]
@@ -124,6 +129,16 @@ def list_popular_providers():
             ranked.sort(key=lambda item: _popular_sort(item[1], db))
         start = (pagination.page - 1) * pagination.page_size
         page_items = ranked[start : start + pagination.page_size]
+        empty = None
+        if not ranked:
+            if query and applied:
+                empty = f"Nada coincide con “{query}” a menos de {radius} km de {origin}."
+            elif query:
+                empty = f"Nada coincide con “{query}” en el índice."
+            elif applied:
+                empty = f"No hay calificados a menos de {radius} km de {origin}."
+            else:
+                empty = "No hay calificados públicos todavía."
         return jsonify(
             {
                 "items": [
@@ -136,13 +151,8 @@ def list_popular_providers():
                     "searchZone": origin,
                     "maxDistanceKm": radius,
                 },
-                "noResultsMessage": None
-                if ranked
-                else (
-                    f"No hay calificados a menos de {radius} km de {origin}."
-                    if applied
-                    else "No hay calificados públicos todavía."
-                ),
+                "query": query or None,
+                "noResultsMessage": empty,
             }
         )
     finally:
@@ -180,14 +190,19 @@ def contact_provider(provider_id: str):
         trade = payload.trade or next((item.trade for item in provider.trades), None)
         if not trade:
             raise ApiError(422, "VALIDATION_ERROR", "El calificado no tiene oficio público.")
+        description = (payload.description or "").strip() or (
+            f"Contacto iniciado desde la ficha de {provider.name}."
+        )
         item = ServiceRequest(
             owner_id=user.id,
             selected_provider_id=provider.id,
             expected_outcome=payload.expected_outcome,
             trade=trade,
             approximate_zone=payload.approximate_zone,
-            description=f"Contacto iniciado desde la ficha de {provider.name}.",
+            desired_date=payload.desired_date,
+            description=description,
             manual_capture=True,
+            decision_expires_at=utcnow().replace(hour=23, minute=59),
         )
         db.add(item)
         db.commit()
@@ -225,6 +240,7 @@ def _work_from_file(stored: StoredFile, db: Session) -> dict | None:
 def list_public_works():
     pagination = PageQuery.model_validate(request.args.to_dict())
     oficio = request.args.get("oficio")
+    query = (request.args.get("q") or "").strip()
     origin, radius, applied = discovery_query()
     db = SessionLocal()
     try:
@@ -237,6 +253,8 @@ def list_public_works():
             if item is None:
                 continue
             if oficio and item["trade"] != oficio:
+                continue
+            if query and not work_matches(query, item):
                 continue
             nearby, _distance = within_radius(
                 origin, radius, item["provider"].get("coverage") or []
@@ -256,6 +274,7 @@ def list_public_works():
                     "searchZone": origin,
                     "maxDistanceKm": radius,
                 },
+                "query": query or None,
             }
         )
     finally:

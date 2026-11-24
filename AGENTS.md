@@ -2,6 +2,12 @@
 
 Backend Flask + PostgreSQL. Cliente web React en `web/`.
 
+## Referencia del curso
+
+Desarrollo formal del backend. El material del curso (SRS, ADR, OpenAPI original y diagramas) permanece en:
+
+`/home/j3su5/tec_de_monterrey/TC5062-A01840340`
+
 ## Design Context
 
 ### Users

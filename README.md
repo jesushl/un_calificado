@@ -2,7 +2,7 @@
 
 Marketplace de oficios para México: conecta a quien necesita un trabajo (albañilería, plomería, electricidad, etc.) con proveedores verificados, sin procesar pagos dentro de la aplicación.
 
-Contrato de API (spec-first): [`contracts/openapi.yaml`](https://github.com/jesushl/un_calificado/blob/main/contracts/openapi.yaml). Trabajo pendiente: [`PLAN.md`](https://github.com/jesushl/un_calificado/blob/main/PLAN.md).
+Contrato de API (spec-first): [`contracts/openapi.yaml`](contracts/openapi.yaml). Trabajo pendiente: [`PLAN.md`](PLAN.md).
 
 ---
 
@@ -33,14 +33,14 @@ Alcance actual del cliente web: índice público (zona + radio), ficha de califi
 
 Vista del entorno local (Docker Compose): cliente → Vite → Flask → PostgreSQL, con JWT/RBAC, OAuth opcional y object store.
 
-![Arquitectura local de UnCalificado](https://github.com/jesushl/un_calificado/blob/main/docs/architecture/uncalificado-architecture.svg?raw=true)
+![Arquitectura local de UnCalificado](docs/architecture/uncalificado-architecture.svg)
 
-Archivos: [`docs/architecture/uncalificado-architecture.svg`](https://github.com/jesushl/un_calificado/blob/main/docs/architecture/uncalificado-architecture.svg) · [versión interactiva (HTML)](https://github.com/jesushl/un_calificado/blob/main/docs/architecture/uncalificado-architecture.html)
+Archivos: [`docs/architecture/uncalificado-architecture.svg`](docs/architecture/uncalificado-architecture.svg) · [versión interactiva (HTML)](docs/architecture/uncalificado-architecture.html)
 
 ### Descripción
 
-1. **Cliente web ([`web/`](https://github.com/jesushl/un_calificado/tree/main/web))** — SPA React servida por Vite en desarrollo. Habla con la API mediante proxy (`/api`, `/health`) para evitar CORS en local; en Compose el destino es el servicio `api`.
-2. **API ([`app/`](https://github.com/jesushl/un_calificado/tree/main/app))** — Flask + Gunicorn. Expone el contrato en `/api/v1` (y alias `/api`). Autenticación JWT (con `jti` revocable), OAuth opcional (Google, Facebook, TikTok), RBAC deny-by-default y rate limit en registro/login.
+1. **Cliente web ([`web/`](web/))** — SPA React servida por Vite en desarrollo. Habla con la API mediante proxy (`/api`, `/health`) para evitar CORS en local; en Compose el destino es el servicio `api`.
+2. **API ([`app/`](app/))** — Flask + Gunicorn. Expone el contrato en `/api/v1` (y alias `/api`). Autenticación JWT (con `jti` revocable), OAuth opcional (Google, Facebook, TikTok), RBAC deny-by-default y rate limit en registro/login.
 3. **PostgreSQL 16** — Fuente de verdad transaccional (usuarios, perfiles, solicitudes, citas, propuestas, mensajes, evaluaciones, verificaciones, bitácora). El esquema se versiona con Alembic.
 4. **Object storage** — Los binarios no viven en la base; se guardan bajo `OBJECT_STORE_PATH` y se entregan con URL temporal firmada.
 5. **Seed (perfil Compose)** — Carga cuentas y datos de demostración solo en entornos `development` / `test`.
@@ -156,13 +156,13 @@ npm install
 npm run dev
 ```
 
-Guía visual: [`web/design/styleguide.html`](https://github.com/jesushl/un_calificado/blob/main/web/design/styleguide.html).
+Guía visual: [`web/design/styleguide.html`](web/design/styleguide.html).
 
 ---
 
 ## 5. Guía de ejecución de pruebas
 
-### Backend ([`tests/`](https://github.com/jesushl/un_calificado/tree/main/tests))
+### Backend ([`tests/`](tests/))
 
 Con dependencias instaladas y variables de entorno de prueba (SQLite en memoria vía fixtures):
 
@@ -185,7 +185,7 @@ cd web
 npm test
 ```
 
-Pruebas E2E (Selenium; ver [`web/e2e/`](https://github.com/jesushl/un_calificado/tree/main/web/e2e)):
+Pruebas E2E (Selenium; ver [`web/e2e/`](web/e2e/)):
 
 ```bash
 pip install -r web/e2e/requirements.txt
@@ -196,7 +196,7 @@ pytest web/e2e
 
 ## 6. Variables de entorno
 
-Valores reales **no** se documentan aquí. Usa `.env` local (no versionado). Referencia: [`.env.example`](https://github.com/jesushl/un_calificado/blob/main/.env.example).
+Valores reales **no** se documentan aquí. Usa `.env` local (no versionado). Referencia: [`.env.example`](.env.example).
 
 | Variable | Obligatoria | Descripción |
 |---|---|---|
@@ -242,24 +242,24 @@ Entorno local de desarrollo: http://localhost:5173 (web) y http://localhost:8000
 
 ## 8. Capturas de pantalla
 
-Vistas principales del cliente web (entorno local con datos demo). Archivos en [`docs/screenshots/`](https://github.com/jesushl/un_calificado/tree/main/docs/screenshots).
+Vistas principales del cliente web (entorno local con datos demo). Archivos en [`docs/screenshots/`](docs/screenshots/).
 
 ### Índice — descubrimiento por zona
 
-![Índice: hero y zona de búsqueda](https://github.com/jesushl/un_calificado/blob/main/docs/screenshots/01-indice.png?raw=true)
+![Índice: hero y zona de búsqueda](docs/screenshots/01-indice.png)
 
 ### Índice — calificados visibles
 
-![Listado de calificados en el índice](https://github.com/jesushl/un_calificado/blob/main/docs/screenshots/02-indice-obra.png?raw=true)
+![Listado de calificados en el índice](docs/screenshots/02-indice-obra.png)
 
 ### Entrar
 
-![Pantalla de inicio de sesión](https://github.com/jesushl/un_calificado/blob/main/docs/screenshots/03-entrar.png?raw=true)
+![Pantalla de inicio de sesión](docs/screenshots/03-entrar.png)
 
 ### Cuenta — radio de descubrimiento
 
-![Preferencias de zona y distancia en Cuenta](https://github.com/jesushl/un_calificado/blob/main/docs/screenshots/04-cuenta.png?raw=true)
+![Preferencias de zona y distancia en Cuenta](docs/screenshots/04-cuenta.png)
 
 ### Ficha de calificado
 
-![Perfil público de un proveedor verificado](https://github.com/jesushl/un_calificado/blob/main/docs/screenshots/05-ficha-calificado.png?raw=true)
+![Perfil público de un proveedor verificado](docs/screenshots/05-ficha-calificado.png)

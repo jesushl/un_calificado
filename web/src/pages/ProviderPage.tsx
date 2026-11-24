@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useSearchParams } from "react-router-dom"
 
 import { api, type ExploreProvider, type ExploreWork } from "../api/client"
 import { initials, tradeKey, tradeLabel } from "../catalog"
@@ -7,6 +7,8 @@ import { ContactCta } from "../components/ContactCta"
 
 export function ProviderPage() {
   const { providerId = "" } = useParams()
+  const [searchParams] = useSearchParams()
+  const preferredTrade = searchParams.get("oficio")
   const [provider, setProvider] = useState<ExploreProvider | null>(null)
   const [works, setWorks] = useState<ExploreWork[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +72,7 @@ export function ProviderPage() {
             </div>
           </dl>
           <div className="ficha-actions">
-            <ContactCta provider={provider} />
+            <ContactCta provider={provider} preferredTrade={preferredTrade} />
           </div>
         </div>
       </div>

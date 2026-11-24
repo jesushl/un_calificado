@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet } from "react-router-dom"
 
 import { Wordmark } from "../brand/Mark"
-import { dataRole } from "../catalog"
+import { accountLabel, dataRole } from "../catalog"
 import { useAuth } from "../auth/AuthContext"
 
 const LINKS = {
@@ -14,6 +14,7 @@ const LINKS = {
   PROVEEDOR: [
     { to: "/", label: "Índice" },
     { to: "/proyectos", label: "Solicitudes" },
+    { to: "/agenda", label: "Agenda" },
     { to: "/cuenta", label: "Cuenta" },
   ],
   ADMINISTRADOR: [
@@ -60,13 +61,23 @@ export function Layout() {
           <div className="cluster" style={{ marginLeft: "auto" }}>
             {user ? (
               <>
-                <span className="role-tag" data-role={dataRole(role)}>
-                  {role === "PROVEEDOR"
-                    ? "Proveedor"
-                    : role === "ADMINISTRADOR"
-                      ? "Administrador"
-                      : "Cliente"}
-                </span>
+                <Link
+                  to="/cuenta"
+                  className="role-tag"
+                  data-role={dataRole(role)}
+                  data-testid="account-label"
+                  title={user.email}
+                  style={{ textDecoration: "none" }}
+                >
+                  <span className="eyebrow" style={{ display: "block", margin: 0 }}>
+                    {role === "PROVEEDOR"
+                      ? "Proveedor"
+                      : role === "ADMINISTRADOR"
+                        ? "Administrador"
+                        : "Cliente"}
+                  </span>
+                  {accountLabel(user)}
+                </Link>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => void logout()}>
                   Cerrar sesión
                 </button>

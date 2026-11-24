@@ -1,17 +1,35 @@
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
+from sqlalchemy import select
 
 from .database import SessionLocal
 from .errors import validation_error
 from .geo import canonical_zone, clamp_radius
-from .models import User
+from .models import Provider, User, UserRole
 from .schemas import UserUpdateRequest
 from .security import get_current_user
 
 router = Blueprint("users", __name__)
 
 
-def serialize_user(user) -> dict:
+def _display_name(user: User, db=None) -> str | None:
+    if user.name and user.name.strip():
+        return user.name.strip()
+    if user.role == UserRole.PROVEEDOR:
+        owns_session = db is None
+        session = db or SessionLocal()
+        try:
+            provider = session.scalar(select(Provider).where(Provider.account_id == user.id))
+            if provider and provider.name:
+                return provider.name
+        finally:
+            if owns_session:
+                session.close()
+    return None
+
+
+def serialize_user(user, db=None) -> dict:
+    display = _display_name(user, db)
     return {
         "id": str(user.id),
         "email": user.email,
@@ -19,7 +37,7 @@ def serialize_user(user) -> dict:
         "status": user.status.value,
         "privacy_consent_version": user.privacy_consent_version,
         "created_at": user.created_at.isoformat(),
-        "name": user.name,
+        "name": display or user.name,
         "phone": user.phone,
         "searchZone": user.search_zone,
         "search_zone": user.search_zone,

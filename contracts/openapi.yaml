@@ -169,6 +169,7 @@ paths:
         - {$ref: '#/components/parameters/Page'}
         - {$ref: '#/components/parameters/PageSize'}
         - {name: oficio, in: query, schema: {type: string}}
+        - {name: q, in: query, schema: {type: string}, description: Búsqueda local por nombre, oficio, zona o servicio}
         - {name: zona, in: query, schema: {type: string}, description: Alcaldía de descubrimiento; no es domicilio exacto}
         - {name: radioKm, in: query, schema: {type: integer, minimum: 2, maximum: 50}}
       responses:
@@ -215,6 +216,7 @@ paths:
         - {$ref: '#/components/parameters/Page'}
         - {$ref: '#/components/parameters/PageSize'}
         - {name: oficio, in: query, schema: {type: string}}
+        - {name: q, in: query, schema: {type: string}, description: Búsqueda local por obra, oficio, zona o nombre del calificado}
         - {name: zona, in: query, schema: {type: string}}
         - {name: radioKm, in: query, schema: {type: integer, minimum: 2, maximum: 50}}
       responses:
@@ -581,6 +583,21 @@ paths:
         '422': {$ref: '#/components/responses/ValidationError'}
         '500': {$ref: '#/components/responses/ServerError'}
   /appointments:
+    get:
+      tags: [appointments]
+      operationId: listAppointments
+      x-acceptance-criteria: [RF-33-AC-1, RF-34-AC-1, RF-34-AC-2, RF-34-AC-3, RF-52-AC-1]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+        - {name: requestId, in: query, schema: {$ref: '#/components/schemas/Uuid'}}
+      responses:
+        '200': {description: Agenda del actor, content: {application/json: {schema: {$ref: '#/components/schemas/AppointmentPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '500': {$ref: '#/components/responses/ServerError'}
     post:
       tags: [appointments]
       operationId: createAppointmentProposal
@@ -647,6 +664,21 @@ paths:
         '422': {$ref: '#/components/responses/ValidationError'}
         '500': {$ref: '#/components/responses/ServerError'}
   /proposals:
+    get:
+      tags: [proposals]
+      operationId: listProposals
+      x-acceptance-criteria: [RF-38-AC-1, RF-39-AC-1, RF-52-AC-2]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+        - {name: requestId, in: query, required: true, schema: {$ref: '#/components/schemas/Uuid'}}
+      responses:
+        '200': {description: Presupuestos del proyecto, content: {application/json: {schema: {$ref: '#/components/schemas/ProposalPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '500': {$ref: '#/components/responses/ServerError'}
     post:
       tags: [proposals]
       operationId: createProposal
@@ -1382,6 +1414,20 @@ components:
         expectedOutcome: {type: string, minLength: 1}
         approximateZone: {type: string, minLength: 1}
         trade: {type: string}
+        desiredDate: {type: string, format: date}
+        description: {type: string}
+    AppointmentPage:
+      type: object
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Appointment'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    ProposalPage:
+      type: object
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Proposal'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
     MessagePage:
       type: object
       required: [items, page]

@@ -9,8 +9,24 @@ import { Mark } from "../brand/Mark"
 export function HomePage() {
   const { user } = useAuth()
   if (user?.role === "ADMINISTRADOR") return <AdminHome />
-  if (user?.role === "PROVEEDOR") return <Inbox title="Solicitudes" emptyTitle="No tienes solicitudes nuevas" emptyText="Cuando un cliente de tu zona pida tu oficio, te aparece aquí. Mientras, mantén tu agenda al día." />
-  return <Inbox title="Tus proyectos" emptyTitle="Aún no tienes proyectos" emptyText="Cuéntanos qué hace falta en tu casa. Con tu colonia y un par de datos, los proveedores verificados de tu zona pueden mandarte propuesta." create />
+  if (user?.role === "PROVEEDOR") {
+    return (
+      <Inbox
+        title="Solicitudes"
+        emptyTitle="No tienes solicitudes nuevas"
+        emptyText="Cuando un cliente de tu zona pida tu oficio, te aparece aquí. Abre cada una para aceptar, proponer visita o mandar presupuesto."
+        provider
+      />
+    )
+  }
+  return (
+    <Inbox
+      title="Tus proyectos"
+      emptyTitle="Aún no tienes proyectos"
+      emptyText="Cuéntanos qué hace falta en tu casa. Con tu colonia y un par de datos, los proveedores verificados de tu zona pueden mandarte propuesta."
+      create
+    />
+  )
 }
 
 function Inbox({
@@ -18,11 +34,13 @@ function Inbox({
   emptyTitle,
   emptyText,
   create = false,
+  provider = false,
 }: {
   title: string
   emptyTitle: string
   emptyText: string
   create?: boolean
+  provider?: boolean
 }) {
   const [items, setItems] = useState<ServiceRequest[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +62,13 @@ function Inbox({
         <p>
           <Link className="btn btn-primary" to="/nuevo">
             Crear mi primer proyecto
+          </Link>
+        </p>
+      ) : null}
+      {provider ? (
+        <p>
+          <Link className="btn btn-ghost" to="/agenda">
+            Ver mi agenda
           </Link>
         </p>
       ) : null}
@@ -73,10 +98,18 @@ function Inbox({
         <ul className="stack">
           {items.map((item) => (
             <li key={item.id}>
-              <Link to={`/proyectos/${item.id}`} className="ficha" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+              <Link
+                to={`/proyectos/${item.id}`}
+                className="ficha"
+                style={{ textDecoration: "none", color: "inherit", display: "block" }}
+                data-testid={`request-card-${item.id}`}
+              >
                 <p className="eyebrow">{tradeLabel(item.trade)}</p>
                 <h2>{item.expectedOutcome}</h2>
                 <p>{item.approximateZone}</p>
+                {provider && item.status === "CONFIRMADA" ? (
+                  <p className="eyebrow">Pendiente de tu aceptación</p>
+                ) : null}
                 <span className="status" data-status={item.status}>
                   {PROJECT_STATUS[item.status] ?? item.status}
                 </span>

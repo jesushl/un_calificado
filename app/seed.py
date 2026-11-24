@@ -74,6 +74,7 @@ def _seed_core(db: Session) -> None:
         email="demo.cliente@example.com",
         password_hash=hash_password("DemoPass123!"),
         role=UserRole.CLIENTE,
+        name="María Demo",
         privacy_consent_version="2026-01",
         adult_declaration=True,
         search_zone="Coyoacán",
@@ -83,6 +84,7 @@ def _seed_core(db: Session) -> None:
         email="demo.proveedor@example.com",
         password_hash=hash_password("DemoPass123!"),
         role=UserRole.PROVEEDOR,
+        name="Construcciones Demo MX",
         privacy_consent_version="2026-01",
         adult_declaration=True,
     )
@@ -90,6 +92,7 @@ def _seed_core(db: Session) -> None:
         email="demo.admin@example.com",
         password_hash=hash_password("DemoPass123!"),
         role=UserRole.ADMINISTRADOR,
+        name="Admin Demo",
         privacy_consent_version="2026-01",
         adult_declaration=True,
     )

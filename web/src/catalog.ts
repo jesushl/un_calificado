@@ -20,6 +20,54 @@ export const PROJECT_STATUS: Record<string, string> = {
   CONCLUIDO: "Concluido",
 }
 
+export const APPOINTMENT_STATUS: Record<string, string> = {
+  PENDIENTE: "Pendiente de confirmar",
+  CONFIRMADA: "Confirmada",
+  EXPIRADA: "Expirada",
+  CANCELADA: "Cancelada",
+}
+
+export const PROPOSAL_STATUS: Record<string, string> = {
+  ENVIADA: "Enviada",
+  ACEPTADA: "Aceptada",
+  NEGOCIACION: "En negociación",
+  RECHAZADA: "Rechazada",
+  EXPIRADA: "Expirada",
+}
+
+export function formatMxn(value: number): string {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+export function formatDateTime(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "America/Mexico_City",
+  }).format(date)
+}
+
+/** Fecha de hoy en Ciudad de México (YYYY-MM-DD) para inputs type=date. */
+export function todayIsoMexico(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date())
+}
+
+export function isPastDate(isoDate: string, today = todayIsoMexico()): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return true
+  return isoDate < today
+}
+
 export const RULER_FILL: Record<string, number> = {
   BORRADOR: 0,
   CONFIRMADA: 20,
@@ -54,6 +102,21 @@ export function tradeKey(id: string | null | undefined): string {
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2)
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "UC"
+}
+
+export function accountLabel(user: {
+  name?: string | null
+  email?: string | null
+  role?: string
+} | null): string {
+  if (!user) return ""
+  const named = user.name?.trim()
+  if (named) return named
+  const email = user.email?.trim()
+  if (email) return email.split("@")[0] || email
+  if (user.role === "PROVEEDOR") return "Proveedor"
+  if (user.role === "ADMINISTRADOR") return "Administrador"
+  return "Cliente"
 }
 
 export const MIN_DISTANCE_KM = 2

@@ -120,6 +120,50 @@ export type OAuthNetwork = {
   configured: boolean
 }
 
+export type Appointment = {
+  id: string
+  requestId: string
+  startsAt: string
+  endsAt: string
+  costMxn: number
+  confirmedByClient: boolean
+  confirmedByProvider: boolean
+  isVisit: boolean
+  status: string
+  expiresAt: string | null
+}
+
+export type ProposalMaterial = {
+  description: string
+  quantity: number
+  unit: string
+  unitPriceMxn: number
+  subtotalMxn: number
+  brandOrQuality?: string
+}
+
+export type Proposal = {
+  id: string
+  requestId: string
+  workDescription: string
+  dates: string[]
+  laborSubtotalMxn: number
+  materials: ProposalMaterial[]
+  additionalCostsMxn: number
+  totalMxn: number
+  version: number
+  status: string
+  issuedAt: string
+  expiresAt: string
+}
+
+export type ProjectMessage = {
+  id: string
+  content: string
+  senderId: string
+  sentAt: string
+}
+
 export const api = {
   register(payload: {
     email: string
@@ -208,32 +252,151 @@ export const api = {
       availabilityPercent: number
     }>(`/api/v1/admin/availability-reports?month=${month}`)
   },
-  popularProviders(oficio?: string, zona?: string, radioKm?: number) {
+  popularProviders(oficio?: string, zona?: string, radioKm?: number, q?: string) {
     const params = new URLSearchParams()
     if (oficio) params.set("oficio", oficio)
     if (zona) params.set("zona", zona)
     if (radioKm) params.set("radioKm", String(radioKm))
+    if (q) params.set("q", q)
     const query = params.toString() ? `?${params}` : ""
-    return request<{ items: ExploreProvider[]; discovery?: Discovery; noResultsMessage?: string | null }>(
-      `/api/v1/explore/providers${query}`,
-    )
+    return request<{
+      items: ExploreProvider[]
+      discovery?: Discovery
+      query?: string | null
+      noResultsMessage?: string | null
+    }>(`/api/v1/explore/providers${query}`)
   },
   publicProvider(id: string) {
     return request<ExploreProvider>(`/api/v1/explore/providers/${id}`)
   },
-  publicWorks(oficio?: string, zona?: string, radioKm?: number) {
+  publicWorks(oficio?: string, zona?: string, radioKm?: number, q?: string) {
     const params = new URLSearchParams()
     if (oficio) params.set("oficio", oficio)
     if (zona) params.set("zona", zona)
     if (radioKm) params.set("radioKm", String(radioKm))
+    if (q) params.set("q", q)
     const query = params.toString() ? `?${params}` : ""
-    return request<{ items: ExploreWork[]; discovery?: Discovery }>(`/api/v1/explore/works${query}`)
+    return request<{ items: ExploreWork[]; discovery?: Discovery; query?: string | null }>(
+      `/api/v1/explore/works${query}`,
+    )
   },
   contactProvider(
     providerId: string,
-    payload: { expectedOutcome: string; approximateZone: string; trade?: string },
+    payload: {
+      expectedOutcome: string
+      approximateZone: string
+      trade?: string
+      desiredDate?: string
+      description?: string
+    },
   ) {
     return request<ServiceRequest>(`/api/v1/explore/providers/${providerId}`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+  },
+  providerDecision(requestId: string, decision: "ACEPTAR" | "RECHAZAR") {
+    return request<ServiceRequest>(`/api/v1/requests/${requestId}/provider-decision`, {
+      method: "POST",
+      body: JSON.stringify({ decision }),
+    })
+  },
+  listAppointments(requestId?: string) {
+    const query = requestId ? `?requestId=${encodeURIComponent(requestId)}` : ""
+    return request<{ items: Appointment[] }>(`/api/v1/appointments${query}`)
+  },
+  createAppointment(payload: {
+    requestId: string
+    startsAt: string
+    endsAt: string
+    costMxn: number
+    confirmedByProvider: boolean
+    isVisit?: boolean
+  }) {
+    return request<Appointment>("/api/v1/appointments", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+  },
+  updateAppointment(
+    appointmentId: string,
+    payload: {
+      confirmedByClient?: boolean
+      confirmedByProvider?: boolean
+      startsAt?: string
+      endsAt?: string
+    },
+  ) {
+    return request<Appointment>(`/api/v1/appointments/${appointmentId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    })
+  },
+  cancelAppointment(appointmentId: string, reason: string) {
+    return request<Appointment>(`/api/v1/appointments/${appointmentId}`, {
+      method: "DELETE",
+      body: JSON.stringify({ reason }),
+    })
+  },
+  listProposals(requestId: string) {
+    return request<{ items: Proposal[] }>(
+      `/api/v1/proposals?requestId=${encodeURIComponent(requestId)}`,
+    )
+  },
+  createProposal(payload: {
+    requestId: string
+    workDescription: string
+    dates?: string[]
+    laborSubtotalMxn: number
+    materials: ProposalMaterial[]
+    additionalCostsMxn: number
+    totalMxn: number
+  }) {
+    return request<Proposal>("/api/v1/proposals", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+  },
+  decideProposal(proposalId: string, decision: "ACEPTAR" | "RECHAZAR" | "PEDIR_CAMBIOS") {
+    return request<Proposal>(`/api/v1/proposals/${proposalId}/decision`, {
+      method: "POST",
+      body: JSON.stringify({ decision }),
+    })
+  },
+  listMessages(requestId: string) {
+    return request<{ items: ProjectMessage[] }>(`/api/v1/requests/${requestId}/messages`)
+  },
+  sendMessage(requestId: string, content: string) {
+    return request<ProjectMessage>(`/api/v1/requests/${requestId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    })
+  },
+  updateRequestStatus(requestId: string, status: string, reason?: string) {
+    return request<ServiceRequest>(`/api/v1/requests/${requestId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, reason }),
+    })
+  },
+  createEvaluation(
+    requestId: string,
+    payload: {
+      subjectType: "PROVEEDOR" | "CLIENTE"
+      score: number
+      punctuality?: number
+      quality?: number
+      cleanliness?: number
+      budgetAdherence?: number
+      comment?: string
+    },
+  ) {
+    return request<{
+      id: string
+      subjectType: string
+      score: number
+      status: string
+      createdAt: string
+    }>(`/api/v1/requests/${requestId}/evaluations`, {
       method: "POST",
       body: JSON.stringify(payload),
     })

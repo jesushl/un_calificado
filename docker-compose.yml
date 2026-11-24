@@ -17,6 +17,18 @@ services:
 
   api:
     build: .
+    # Código montado desde el host: edita y guarda; Gunicorn recarga solo.
+    # Rebuild solo si cambian Dockerfile o requirements.txt.
+    command:
+      [
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:8000",
+        "--workers",
+        "1",
+        "--reload",
+        "app.main:app",
+      ]
     ports:
       - "8000:8000"
     environment:
@@ -36,10 +48,30 @@ services:
       OAUTH_TIKTOK_CLIENT_KEY: ${OAUTH_TIKTOK_CLIENT_KEY:-}
       OAUTH_TIKTOK_CLIENT_SECRET: ${OAUTH_TIKTOK_CLIENT_SECRET:-}
     volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+      - ./tests:/app/tests
+      - ./contracts:/app/contracts
       - object_store:/data/objects
     depends_on:
       db:
         condition: service_healthy
+
+  web:
+    build: ./web
+    # Código montado desde el host: Vite recarga al guardar.
+    # Rebuild solo si cambian web/Dockerfile o package*.json.
+    ports:
+      - "5173:5173"
+    environment:
+      API_PROXY_TARGET: http://api:8000
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    depends_on:
+      - api
 
   seed:
     build: .
@@ -51,6 +83,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env antes de cargar datos}
       OBJECT_STORE_PATH: /data/objects
     volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+      - ./tests:/app/tests
       - object_store:/data/objects
     depends_on:
       db:
@@ -59,3 +95,4 @@ services:
 volumes:
   postgres_data:
   object_store:
+  web_node_modules:

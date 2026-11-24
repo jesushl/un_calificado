@@ -13,37 +13,29 @@ Flask, PostgreSQL, Alembic, JWT, bcrypt y los handlers del contrato: autenticaci
 ## Arranque local
 
 1. Copia `.env.example` como `.env` y cambia `JWT_SECRET`.
-2. Inicia PostgreSQL:
+2. Construye e inicia base, API y cliente web (solo la primera vez o si cambian Dockerfiles / dependencias). Los contenedores montan el código del repo y recargan al guardar:
 
 ```bash
-docker compose up -d db
+docker compose up -d --build
 ```
 
-3. Construye e inicia la API (el contenedor aplica `alembic upgrade head`):
+En el día a día, sin rebuild:
 
 ```bash
-docker compose up -d --build api
+docker compose up -d
 ```
 
-4. Carga datos de demostración:
+3. Carga datos de demostración:
 
 ```bash
 docker compose --profile seed run --rm seed
 ```
 
-La API queda en `http://localhost:8000`. PostgreSQL en `5432`.
+- Cliente web: `http://localhost:5173`
+- API: `http://localhost:8000`
+- PostgreSQL: `5432`
 
-## Cliente web
-
-En `web/` hay la versión React (rama `frontend`). Con la API arriba:
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-El cliente queda en `http://localhost:5173`. Guía visual en `web/design/styleguide.html`. Pruebas: `npm test` (unitarias) y `pytest web/e2e` (Selenium).
+Guía visual en `web/design/styleguide.html`. Pruebas: `cd web && npm test` (unitarias) y `pytest web/e2e` (Selenium).
 
 Cuentas demo (`DemoPass123!`):
 
